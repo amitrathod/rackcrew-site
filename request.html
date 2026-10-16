@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Request a crew | Rackcrew</title>
 <meta name="description" content="Describe your data center build and put together the crew for it, person by person or as a ready-made crew.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&display=swap">
+<link rel="preload" href="/fonts/KottaOne-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+@font-face{font-family:'Kotta One';src:url('/fonts/KottaOne-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Geist';src:url('/fonts/Geist-Variable.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}
 :root{
   --maroon:#3A1418; --maroon-2:#5A262C; --ink:#2B1013; --ink-2:#6B4A47;
   --paper:#FFF8F1; --card:#FFFFFF; --line:#EEDFD2; --soft:#F7ECE1;
@@ -17,18 +17,18 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:'Bricolage Grotesque','Arial Narrow',sans-serif;font-size:17px;line-height:1.45}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Geist',system-ui,sans-serif;font-size:17px;line-height:1.45}
 h1,h2,h3,p{margin:0}
 a{color:inherit}
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--turbine);outline-offset:2px}
 .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
-.condensed{font-weight:800;font-stretch:75%;letter-spacing:-.02em;line-height:.92}
+.condensed{font-family:'Kotta One',Georgia,serif;font-weight:400;letter-spacing:-.01em;line-height:1}
 
 /* top */
 .top{background:var(--maroon);color:#FBEBDC}
 .top nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 0}
-.brand{font-weight:800;font-stretch:75%;font-size:30px;text-decoration:none;letter-spacing:-.01em}
+.brand{font-family:'Kotta One',Georgia,serif;font-weight:400;font-size:30px;text-decoration:none}
 .steps{display:flex;gap:6px;list-style:none;margin:0;padding:0;font-size:14px}
 .steps li{padding:6px 0 6px 14px;color:#B98F84;white-space:nowrap;font-size:14px}
 .steps li.on{color:#FBEBDC;font-weight:700;text-decoration:underline;text-decoration-color:var(--turbine);text-decoration-thickness:3px;text-underline-offset:7px}
@@ -77,7 +77,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:26px 0 8px}
 .mode{display:flex;gap:14px;align-items:flex-start;text-align:left;padding:16px;border-radius:20px;border:2px solid var(--line);background:var(--card);cursor:pointer}
 .mode[aria-pressed="true"]{border-color:var(--maroon);box-shadow:0 0 0 2px var(--maroon) inset}
-.mode .t{font-weight:800;font-stretch:80%;font-size:22px;line-height:1.05}
+.mode .t{font-weight:700;font-size:20px;line-height:1.1}
 .mode .d{font-size:15px;color:var(--ink-2);margin-top:4px}
 .mode .ic{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--soft)}
 
@@ -99,7 +99,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .ava{position:relative;flex:none;width:68px;height:68px}
 .ava svg.face{width:68px;height:68px;border-radius:50%;display:block}
 .ava .badge{position:absolute;right:-4px;bottom:-2px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:3px solid #fff}
-.who h3{font-size:20px;font-weight:800;font-stretch:85%;line-height:1.1}
+.who h3{font-size:19px;font-weight:650;line-height:1.15;letter-spacing:-.01em}
 .who .role{font-size:15px;color:var(--ink-2)}
 .who .meta{font-size:14px;color:var(--ink-2);margin-top:2px}
 .facts{display:flex;flex-wrap:wrap;gap:6px}
@@ -110,8 +110,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .past li::before{content:"";flex:none;width:8px;height:8px;border-radius:2px;margin-top:7px;background:var(--line)}
 .past .y{color:var(--ink-2);margin-left:auto;padding-left:8px;white-space:nowrap;font-size:14px}
 .card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:4px;border-top:1px solid var(--soft)}
-.rate{font-weight:800;font-size:22px;font-stretch:85%}
-.rate small{font-weight:500;font-size:14px;color:var(--ink-2);font-stretch:100%}
+.rate{font-weight:700;font-size:21px;letter-spacing:-.01em}
+.rate small{font-weight:500;font-size:14px;color:var(--ink-2)}
 .avail{font-size:14px}
 .avail.ok{color:var(--ok)} .avail.late{color:var(--warn)}
 .sec{font-size:13px;font-weight:700;color:var(--ink-2)}
@@ -158,7 +158,7 @@ main{padding-bottom:120px}
 .rm{border:0;background:transparent;color:var(--ink-2);cursor:pointer;text-decoration:underline;font-size:14px;padding:4px}
 .total{display:grid;gap:8px;font-size:16px}
 .total div{display:flex;justify-content:space-between;gap:10px}
-.total .big{font-weight:800;font-stretch:85%;font-size:30px;padding-top:8px;border-top:1.5px solid var(--line)}
+.total .big{font-family:'Kotta One',Georgia,serif;font-weight:400;font-size:30px;padding-top:8px;border-top:1.5px solid var(--line)}
 .note{font-size:14px;color:var(--ink-2)}
 .warnbox{background:#FFF1DE;border-radius:14px;padding:10px 14px;font-size:15px;color:#6E3D00}
 .okbox{background:#E9F3EC;border-radius:14px;padding:10px 14px;font-size:15px;color:#1F5A3D}
@@ -647,7 +647,7 @@ function renderConfirm(){
     </form>
     <div class="panel">
       <div class="sec">Your crew</div>
-      <div style="margin-top:6px">${crew?`<p style="font-weight:800;font-stretch:85%;font-size:24px">${esc(crew.name)}</p>`:""}${ppl.map(p=>`<div class="row">${ava(p)}<div class="nm"><b>${esc(p.name)}</b><span>${esc(p.role)}</span></div><div class="r">${money(p.rate)}/hr</div></div>`).join("")}${crew&&crew.extra?`<div class="row"><div class="nm"><b>${esc(crew.extra[0].toUpperCase()+crew.extra.slice(1))}</b></div></div>`:""}</div>
+      <div style="margin-top:6px">${crew?`<p style="font-family:'Kotta One',Georgia,serif;font-size:26px">${esc(crew.name)}</p>`:""}${ppl.map(p=>`<div class="row">${ava(p)}<div class="nm"><b>${esc(p.name)}</b><span>${esc(p.role)}</span></div><div class="r">${money(p.rate)}/hr</div></div>`).join("")}${crew&&crew.extra?`<div class="row"><div class="nm"><b>${esc(crew.extra[0].toUpperCase()+crew.extra.slice(1))}</b></div></div>`:""}</div>
       <div class="total" style="margin-top:10px">
         <div><span>Starts</span><b>${fmtLong(S.start)}</b></div>
         <div><span>Length</span><b>${S.weeks===26?"6 months":S.weeks+" weeks"}</b></div>
