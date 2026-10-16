@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Join a crew | Rackcrew</title>
+<meta name="description" content="Turbine, electrical, HVAC and network specialists: join the Rackcrew bench and get matched to data center builds.">
+<link rel="preload" href="/fonts/KottaOne-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/flow.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <nav aria-label="Main"><a class="brand" href="/">Rackcrew</a><div class="progress" id="progress" aria-live="polite"></div></nav>
+  </div>
+  <div class="wrap" id="hero"></div>
+</header>
+<main class="wrap" id="app"></main>
+<div class="bar" id="bar" role="region" aria-label="Step navigation"></div>
+
+<script src="/assets/rackcrew.js"></script>
+<script>
+(function(){
+"use strict";
+const {TRADES,SKILLS,CERTS,esc,$,$$,icon,avatar,progress,today,iso,addDays,fmtLong}=RC;
+const LEVELS=[["lead","Lead or foreman","Runs a crew and signs off the work"],["journeyman","Journeyman","Licensed or fully qualified in the trade"],["tech","Technician","Skilled in a specialty, works under a lead"],["helper","Helper","Some field time, still building skills"]];
+const BACKGROUNDS=["Utility","Power plant","Oil and gas","Military","Manufacturing plant","Commercial construction","Telecom","Hospital or facilities","Semiconductor fab"];
+const BUILDS=["None yet","1","2","3 to 5","6 or more"];
+const SKINS=["#F0C2A0","#E0A47E","#C98A64","#B06E4E","#8A4B32","#5E3324"];
+const HATS=[["hardhat","Hard hat"],["cap","Cap"],["beanie","Beanie"],["bun","Hair up"],["short","No hat"]];
+const N=4;
+const S={step:1,text:"",parsed:false,trade:null,level:null,skills:new Set(),years:5,builds:null,past:[{what:"",year:""}],certs:new Set(),customCerts:[],bg:new Set(),
+  home:"",travel:"state",from:iso(addDays(today,14)),rate:65,daily:true,mentor:false,skin:SKINS[2],hat:"hardhat",photo:null,name:"",phone:"",email:"",err:""};
+
+/* --- describe-yourself parser: prefills the form --- */
+function parse(t){
+  const s=" "+t.toLowerCase()+" "; const out={};
+  const tradeWords={turbine:["turbine","genset","generator","power plant","bess","battery"],electrical:["electric","switchgear","lineman","linemen","substation","ups","busway","journeyman electrician","wiring"],hvac:["hvac","chiller","cooling","pipefit","refrigeration","bms","controls"],networks:["fiber","network","cabling","rack","server","gpu","infiniband","splic"]};
+  let best=null,bestN=0; for(const [k,ws] of Object.entries(tradeWords)){const n=ws.filter(w=>s.includes(w)).length; if(n>bestN){best=k;bestN=n;}}
+  if(best){ out.trade=best; out.skills=SKILLS[best].filter(sk=>sk.toLowerCase().split(/ and | /).some(w=>w.length>3&&s.includes(w.toLowerCase().replace(/s$/,"")))); }
+  let m=s.match(/(\d{1,2})\s*(\+\s*)?(years|yrs|year)/); if(m) out.years=+m[1];
+  m=s.match(/(\d{1,2}|one|two|three|four|five|six)\s+(data ?cent(er|re)s?|builds?|campus(es)?|data halls?)/);
+  if(m){const v={one:1,two:2,three:3,four:4,five:5,six:6}[m[1]]||+m[1]; out.builds=v===0?"None yet":v===1?"1":v===2?"2":v<=5?"3 to 5":"6 or more";}
+  if(/\b(foreman|lead|supervisor|superintendent)\b/.test(s)) out.level="lead"; else if(/journeyman/.test(s)) out.level="journeyman"; else if(/\b(helper|apprentice)\b/.test(s)) out.level="helper"; else if(/\b(tech|technician|splicer|installer)\b/.test(s)) out.level="tech";
+  const bgMap={"Utility":["utility","utilities"],"Power plant":["power plant"],"Oil and gas":["oil","gas field","refinery","oilfield"],"Military":["navy","army","air force","marine","military","veteran"],"Manufacturing plant":["manufactur","plant"],"Telecom":["telecom","isp","cable company"],"Semiconductor fab":["fab","semiconductor"]};
+  out.bg=Object.entries(bgMap).filter(([,ws])=>ws.some(w=>s.includes(w))).map(([k])=>k);
+  const certs=Object.values(CERTS).flat().filter(c=>s.includes(c.toLowerCase()));
+  out.certs=[...new Set(certs)];
+  m=t.match(/\b(?:in|from|based in|live in)\s+([A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)?(?:,\s*[A-Z]{2})?)/); if(m) out.home=m[1];
+  return out;
+}
+function applyParse(p){
+  if(p.trade){S.trade=p.trade;} if(p.skills?.length) S.skills=new Set(p.skills);
+  if(p.years) S.years=p.years; if(p.builds) S.builds=p.builds; if(p.level) S.level=p.level;
+  p.bg?.forEach(b=>S.bg.add(b)); p.certs?.forEach(c=>S.certs.add(c)); if(p.home) S.home=p.home;
+  S.parsed=p;
+}
+
+/* --- render --- */
+function render(){
+  $("#progress").innerHTML=S.step<=N?progress(S.step,N):"";
+  ({1:stepTrade,2:stepExperience,3:stepWhere,4:stepProfile,5:stepDone})[S.step]();
+  renderBar();
+}
+function hero(title,sub,extra=""){ $("#hero").innerHTML=`<div class="hero"><h1 class="display">${title}</h1>${sub?`<p>${sub}</p>`:""}${extra}</div>`; }
+
+function stepTrade(){
+  const p=S.parsed;
+  const understood = p ? `<div class="understood">${p.trade||p.years||p.builds?"We filled in what we could. Check it below.":"We couldn’t pick out your trade. Choose it below."}<div class="chips">${p.trade?`<span class="pchip"><b>${TRADES[p.trade].name}</b></span>`:""}${(p.skills||[]).map(s=>`<span class="pchip">${esc(s)}</span>`).join("")}${p.years?`<span class="pchip"><b>${p.years}</b> years</span>`:""}${p.builds?`<span class="pchip"><b>${esc(p.builds)}</b> builds</span>`:""}${p.home?`<span class="pchip">${esc(p.home)}</span>`:""}</div></div>`:"";
+  hero("What’s your trade?","Data center builds need people who’ve worked turbines, panels, chillers and fiber. Tell us yours.",
+   `<form id="desc" role="search"><label for="d" class="sr">Describe your work</label><div class="search"><textarea id="d" rows="1" placeholder="In your words: “Journeyman electrician, 12 years, switchgear at 3 data centers, based in Mesa”">${esc(S.text)}</textarea><button class="btn" type="submit">Fill it in for me</button></div>${understood}</form>`);
+  $("#desc").addEventListener("submit",e=>{e.preventDefault(); const v=$("#d").value.trim(); if(!v) return; S.text=v; applyParse(parse(v)); render();});
+  const ta=$("#d"); const grow=()=>{ta.style.height="auto"; ta.style.height=Math.min(ta.scrollHeight,140)+"px";}; ta.addEventListener("input",grow); grow();
+  ta.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault(); $("#desc").requestSubmit();}});
+
+  $("#app").innerHTML=`
+  <div class="q"><div class="label" id="tl">Your trade</div>
+    <div class="tiles" role="group" aria-labelledby="tl">${Object.entries(TRADES).map(([k,T])=>`<button type="button" class="tile" data-trade="${k}" aria-pressed="${S.trade===k}" style="background:${T.color};color:${T.ink}"><span class="ic">${icon(k,22,T.ink)}</span><span><span class="nm">${T.short}</span><span class="sub" style="display:block">${{turbine:"Gas turbines, gensets, batteries",electrical:"Switchgear, busway, substations",hvac:"Chillers, controls, liquid cooling",networks:"Fiber, cabling, GPU racks"}[k]}</span></span></button>`).join("")}</div></div>
+  ${S.trade?`
+  <div class="q"><div class="label" id="ll">Your level</div>
+    <div class="opts" role="radiogroup" aria-labelledby="ll">${LEVELS.map(([k,l,d])=>`<button type="button" class="opt" role="radio" data-level="${k}" aria-pressed="${S.level===k}" aria-checked="${S.level===k}"><span class="mk"></span><span><b>${l}</b><span>${d}</span></span></button>`).join("")}</div></div>
+  <div class="q"><div class="label" id="sl">What you’re best at</div><div class="hint">Pick all that apply. Builders search by these.</div>
+    <div class="chips" role="group" aria-labelledby="sl">${SKILLS[S.trade].map(sk=>`<button type="button" class="tchip" data-skill="${esc(sk)}" aria-pressed="${S.skills.has(sk)}">${esc(sk)}</button>`).join("")}</div></div>`:""}`;
+  $$("[data-trade]").forEach(b=>b.onclick=()=>{ if(S.trade!==b.dataset.trade){S.trade=b.dataset.trade; S.skills=new Set([...S.skills].filter(s=>SKILLS[S.trade].includes(s)));} S.err=""; render();});
+  $$("[data-level]").forEach(b=>b.onclick=()=>{S.level=b.dataset.level; S.err=""; render();});
+  $$("[data-skill]").forEach(b=>b.onclick=()=>{const k=b.dataset.skill; S.skills.has(k)?S.skills.delete(k):S.skills.add(k); b.setAttribute("aria-pressed",S.skills.has(k)); S.err=""; renderBar();});
+}
+
+function stepExperience(){
+  hero("Show what you’ve built.","Builders hire people who have done the job before. A few lines here go a long way.");
+  const certList=[...new Set([...CERTS[S.trade],...S.customCerts])];
+  $("#app").innerHTML=`
+  <div class="q"><div class="label" id="yl">Years in the trade</div>
+    <div class="stepper" role="group" aria-labelledby="yl"><button type="button" id="ym" aria-label="Fewer years">−</button><output id="yv" aria-live="polite">${S.years}</output><button type="button" id="yp" aria-label="More years">+</button></div></div>
+  <div class="q"><div class="label" id="bl">Data center builds you’ve worked</div>
+    <div class="seg" role="group" aria-labelledby="bl">${BUILDS.map(b=>`<button type="button" data-builds="${b}" aria-pressed="${S.builds===b}">${b}</button>`).join("")}</div></div>
+  <div class="q"><div class="label">Recent jobs</div><div class="hint">What you did, in one line. Data centers or not: plants, refineries and hospitals count.</div>
+    <div class="panel" style="display:grid;gap:12px">${S.past.map((p,i)=>`<div class="fields" style="grid-template-columns:minmax(0,3fr) minmax(0,1fr)"><div class="field"><label for="pw${i}">Job ${i+1}</label><input id="pw${i}" data-pw="${i}" value="${esc(p.what)}" placeholder="Pulled and terminated feeders for a 30 MW data hall"></div><div class="field"><label for="py${i}">Year</label><input id="py${i}" data-py="${i}" inputmode="numeric" maxlength="4" value="${esc(p.year)}" placeholder="${today.getFullYear()}"></div></div>`).join("")}
+    ${S.past.length<3?`<div><button type="button" class="btn light" id="addPast">Add another job</button></div>`:""}</div></div>
+  <div class="q"><div class="label" id="cl">Licenses and certifications</div>
+    <div class="chips" role="group" aria-labelledby="cl">${certList.map(c=>`<button type="button" class="tchip" data-cert="${esc(c)}" aria-pressed="${S.certs.has(c)}">${esc(c)}</button>`).join("")}</div>
+    <form class="inline" id="certForm" style="max-width:460px"><label for="nc" class="sr">Add a certification</label><input id="nc" class="field" style="flex:1;min-height:46px;border:1.5px solid var(--line);border-radius:999px;padding:8px 16px;background:#fff" placeholder="Add one that’s not listed"><button class="btn light" type="submit">Add</button></form></div>
+  <div class="q"><div class="label" id="gl">Where you came from</div><div class="hint">Most of our best people learned the trade somewhere else first.</div>
+    <div class="chips" role="group" aria-labelledby="gl">${BACKGROUNDS.map(b=>`<button type="button" class="tchip" data-bg="${b}" aria-pressed="${S.bg.has(b)}">${b}</button>`).join("")}</div></div>`;
+  $("#ym").onclick=()=>{S.years=Math.max(0,S.years-1); $("#yv").textContent=S.years;};
+  $("#yp").onclick=()=>{S.years=Math.min(50,S.years+1); $("#yv").textContent=S.years;};
+  $$("[data-builds]").forEach(b=>b.onclick=()=>{S.builds=b.dataset.builds; $$("[data-builds]").forEach(x=>x.setAttribute("aria-pressed",x===b));});
+  $$("[data-pw]").forEach(i=>i.oninput=()=>S.past[+i.dataset.pw].what=i.value);
+  $$("[data-py]").forEach(i=>i.oninput=()=>S.past[+i.dataset.py].year=i.value.replace(/\D/g,""));
+  $("#addPast")?.addEventListener("click",()=>{S.past.push({what:"",year:""}); render(); $("#pw"+(S.past.length-1)).focus();});
+  $$("[data-cert]").forEach(b=>b.onclick=()=>{const k=b.dataset.cert; S.certs.has(k)?S.certs.delete(k):S.certs.add(k); b.setAttribute("aria-pressed",S.certs.has(k));});
+  $("#certForm").onsubmit=e=>{e.preventDefault(); const v=$("#nc").value.trim(); if(!v) return; S.customCerts.push(v); S.certs.add(v); render();};
+  $$("[data-bg]").forEach(b=>b.onclick=()=>{const k=b.dataset.bg; S.bg.has(k)?S.bg.delete(k):S.bg.add(k); b.setAttribute("aria-pressed",S.bg.has(k));});
+}
+
+function stepWhere(){
+  hero("Where and when can you work?","You set your rate and how far you’ll go. Change it any time.");
+  $("#app").innerHTML=`
+  <div class="q"><div class="fields"><div class="field"><label for="home">Home base</label><input id="home" autocomplete="address-level2" value="${esc(S.home)}" placeholder="City, state"></div>
+    <div class="field"><label for="from">Free to start from</label><input id="from" type="date" min="${iso(today)}" value="${S.from}"></div></div></div>
+  <div class="q"><div class="label" id="trl">How far will you travel?</div>
+    <div class="opts" role="radiogroup" aria-labelledby="trl">${[["local","Local only","About an hour from home"],["state","Anywhere in my state","Home most weekends"],["anywhere","Anywhere","With per diem and travel paid"]].map(([k,l,d])=>`<button type="button" class="opt" role="radio" data-travel="${k}" aria-pressed="${S.travel===k}" aria-checked="${S.travel===k}"><span class="mk"></span><span><b>${l}</b><span>${d}</span></span></button>`).join("")}</div></div>
+  <div class="q"><label class="label" for="rate">Your hourly rate: <span id="rv">$${S.rate}</span></label>
+    <input id="rate" type="range" min="25" max="150" step="1" value="${S.rate}" aria-describedby="rh"><div class="hint" id="rh">This is what you take home per hour on W2. Builders see a bill rate that adds payroll, insurance and our fee.</div></div>
+  <div class="q" style="gap:10px">
+    <button type="button" class="switch" role="switch" id="daily" aria-checked="${S.daily}"><span><b>Get paid every day you work</b><span>Your earnings land the same day instead of waiting for a weekly check.</span></span><span class="sw" aria-hidden="true"></span></button>
+    <button type="button" class="switch" role="switch" id="mentor" aria-checked="${S.mentor}"><span><b>I’ll take an apprentice on my crew</b><span>Leads who teach earn a mentor premium on every hour. [Premium to set]</span></span><span class="sw" aria-hidden="true"></span></button>
+  </div>`;
+  $("#home").oninput=e=>S.home=e.target.value; $("#from").onchange=e=>S.from=e.target.value;
+  $$("[data-travel]").forEach(b=>b.onclick=()=>{S.travel=b.dataset.travel; $$("[data-travel]").forEach(x=>{x.setAttribute("aria-pressed",x===b); x.setAttribute("aria-checked",x===b);});});
+  $("#rate").oninput=e=>{S.rate=+e.target.value; $("#rv").textContent="$"+S.rate;};
+  ["daily","mentor"].forEach(k=>$("#"+k).onclick=e=>{S[k]=!S[k]; e.currentTarget.setAttribute("aria-checked",S[k]);});
+}
+
+function previewCard(){
+  const T=TRADES[S.trade]; const lvl=LEVELS.find(l=>l[0]===S.level)?.[1]||"";
+  const role=[lvl, T.short.toLowerCase()].filter(Boolean).join(", ");
+  const jobs=S.past.filter(p=>p.what.trim());
+  return `<article class="card" aria-label="Your profile as builders see it">
+    <div class="who">${avatar(S.trade,{skin:S.skin,hat:S.hat,photo:S.photo,label:S.name||"You"})}<div style="min-width:0"><h3>${esc(S.name||"Your name")}</h3><div class="role">${esc(role[0]?.toUpperCase()+role.slice(1))}</div><div class="meta">${esc(S.home||"Home base")}, ${S.years} ${S.years===1?"year":"years"}</div></div></div>
+    <div class="facts">${[...S.skills].map(s=>`<span class="tag">${esc(s)}</span>`).join("")}${S.builds&&S.builds!=="None yet"?`<span class="tag">${esc(S.builds)} data center builds</span>`:""}</div>
+    ${jobs.length?`<div><div class="sec">Past work</div><ul class="past">${jobs.map(j=>`<li><span>${esc(j.what)}</span><span class="y">${esc(j.year)}</span></li>`).join("")}</ul></div>`:""}
+    ${S.certs.size||S.bg.size?`<div><div class="sec">Background</div><div class="facts" style="margin-top:6px">${[...S.bg].map(b=>`<span class="tag">Ex-${esc(b.toLowerCase())}</span>`).join("")}${[...S.certs].map(c=>`<span class="tag">${esc(c)}</span>`).join("")}</div></div>`:""}
+    <div class="card-foot"><div><div class="rate">$${S.rate}<small> /hr take-home</small></div><span class="ok" style="font-size:14px">Free from ${fmtLong(S.from+"T00:00")}</span></div>${S.mentor?`<span class="tag">Takes an apprentice</span>`:""}</div>
+  </article>`;
+}
+function stepProfile(){
+  hero("Last step: your profile.","This is the card builders see when they search. Add a photo or make an illustrated one.");
+  $("#app").innerHTML=`<div class="two">
+    <div>
+      <div class="q"><div class="label">Your picture</div>
+        <div class="panel" style="display:grid;gap:14px">
+          <div class="inline" style="flex-wrap:wrap"><label class="btn light" for="photo" style="cursor:pointer">Upload a photo</label><input id="photo" type="file" accept="image/*" class="sr">${S.photo?`<button type="button" class="btn ghost" id="nophoto">Use an illustration instead</button>`:""}</div>
+          ${S.photo?"":`<div><div class="sec" id="skl">Skin tone</div><div class="chips" role="group" aria-labelledby="skl" style="margin-top:8px">${SKINS.map(c=>`<button type="button" data-skin="${c}" aria-pressed="${S.skin===c}" aria-label="Skin tone" style="width:40px;height:40px;border-radius:50%;border:3px solid ${S.skin===c?"var(--maroon)":"#fff"};box-shadow:0 0 0 1.5px var(--line);background:${c};cursor:pointer"></button>`).join("")}</div></div>
+          <div><div class="sec" id="hl">On your head</div><div class="seg" role="group" aria-labelledby="hl" style="margin-top:8px">${HATS.map(([k,l])=>`<button type="button" data-hat="${k}" aria-pressed="${S.hat===k}">${l}</button>`).join("")}</div></div>`}
+        </div></div>
+      <div class="q"><div class="label">How builders reach you</div>
+        <div class="fields"><div class="field"><label for="nm">Full name</label><input id="nm" autocomplete="name" value="${esc(S.name)}"></div>
+        <div class="field"><label for="ph">Mobile phone</label><input id="ph" type="tel" autocomplete="tel" value="${esc(S.phone)}" placeholder="We text you new jobs"></div>
+        <div class="field"><label for="em">Email</label><input id="em" type="email" autocomplete="email" value="${esc(S.email)}"></div></div></div>
+    </div>
+    <div style="position:sticky;top:12px"><div class="sec" style="margin-bottom:8px">Builders see</div><div id="pv">${previewCard()}</div></div>
+  </div>`;
+  const upd=()=>{$("#pv").innerHTML=previewCard();};
+  $("#photo").onchange=e=>{const f=e.target.files[0]; if(!f) return; if(!f.type.startsWith("image/")){S.err="That file isn’t an image. Choose a JPG or PNG."; renderBar(); return;}
+    const r=new FileReader(); r.onload=()=>{S.photo=r.result; S.err=""; render();}; r.readAsDataURL(f);};
+  $("#nophoto")?.addEventListener("click",()=>{S.photo=null; render();});
+  $$("[data-skin]").forEach(b=>b.onclick=()=>{S.skin=b.dataset.skin; render();});
+  $$("[data-hat]").forEach(b=>b.onclick=()=>{S.hat=b.dataset.hat; render();});
+  [["nm","name"],["ph","phone"],["em","email"]].forEach(([id,k])=>$("#"+id).oninput=e=>{S[k]=e.target.value; if(k==="name") upd();});
+}
+function stepDone(){
+  $("#hero").innerHTML="";
+  $("#app").innerHTML=`<div style="max-width:640px;margin:0 auto">
+    <div class="done"><div style="margin-bottom:16px">${avatar(S.trade,{skin:S.skin,hat:S.hat,photo:S.photo,label:S.name})}</div>
+      <h1 class="display">You’re on the bench, ${esc(S.name.split(" ")[0]||"crew")}.</h1>
+      <p style="margin-top:12px;color:#E8CDBF">Builders searching for ${esc([...S.skills].slice(0,2).join(" and ").toLowerCase()||TRADES[S.trade].name.toLowerCase())} can now find you.</p>
+      <ol class="next"><li><span class="n">1</span><span>We check your licenses and call two references, usually within a week.</span></li>
+      <li><span class="n">2</span><span>When a crew needs you, we ${S.phone?"text you":"email you"} the site, dates and rate. You say yes or no.</span></li>
+      <li><span class="n">3</span><span>Say yes and you’re on payroll from day one${S.daily?", paid every day you work":""}.</span></li></ol></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px"><a class="btn" href="/">Back to Rackcrew</a><a class="btn light" href="/request">See how builders hire</a></div>
+    <p class="sample">This preview doesn’t send anything yet.</p></div>`;
+}
+
+/* --- bottom bar --- */
+function check(){
+  if(S.step===1){ if(!S.trade) return "Choose your trade to continue."; if(!S.level) return "Choose your level."; if(!S.skills.size) return "Pick at least one thing you’re best at."; }
+  if(S.step===2){ if(!S.builds) return "Tell us how many data center builds you’ve worked. None yet is fine."; }
+  if(S.step===3){ if(!S.home.trim()) return "Add your home base so we can match nearby jobs."; }
+  if(S.step===4){ if(!S.name.trim()) return "Add your name."; if(!S.phone.trim()&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(S.email)) return "Add a phone number or a valid email so builders can reach you."; }
+  return "";
+}
+function renderBar(){
+  const bar=$("#bar"); if(S.step>N){bar.hidden=true; return;} bar.hidden=false;
+  const labels={1:"Next: experience",2:"Next: where and when",3:"Next: your profile",4:"Join the bench"};
+  bar.innerHTML=`<div class="in">${S.step>1?`<button class="btn light" type="button" id="back">Back</button>`:""}<div class="msg ${S.err?"err":""}" role="status">${esc(S.err||({1:"Takes about 3 minutes.",2:"Recent jobs help most.",3:"You can change these later.",4:"Check your card, then join."})[S.step])}</div><button class="btn ${S.step===N?"gold":""}" type="button" id="next">${labels[S.step]}</button></div>`;
+  $("#back")?.addEventListener("click",()=>{S.err=""; S.step--; render(); scrollTo(0,0);});
+  $("#next").onclick=()=>{const e=check(); if(e){S.err=e; renderBar(); if(innerWidth<760) alertInline(e); return;} S.err=""; S.step++; render(); scrollTo(0,0);};
+}
+function alertInline(msg){ let el=$("#inlineErr"); if(!el){el=document.createElement("p"); el.id="inlineErr"; el.className="warnbox"; el.setAttribute("role","alert"); $("#app").prepend(el);} el.textContent=msg; el.scrollIntoView({block:"center",behavior:"smooth"}); }
+
+render();
+})();
+</script>
+</body>
+</html>

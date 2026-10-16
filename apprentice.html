@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Start as an apprentice | Rackcrew</title>
+<meta name="description" content="New to the trades? Join a Rackcrew crew as a paid apprentice and find the state and county programs that can pay your training fees.">
+<link rel="preload" href="/fonts/KottaOne-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/flow.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <nav aria-label="Main"><a class="brand" href="/">Rackcrew</a><div class="progress" id="progress" aria-live="polite"></div></nav>
+  </div>
+  <div class="wrap" id="hero"></div>
+</header>
+<main class="wrap" id="app"></main>
+<div class="bar" id="bar" role="region" aria-label="Step navigation"></div>
+
+<script src="/assets/rackcrew.js"></script>
+<script>
+(function(){
+"use strict";
+const {TRADES,esc,$,$$,icon,avatar,progress,today,iso,addDays}=RC;
+const N=4;
+const STAGES=[["hs","Just finished high school","Or about to graduate"],["trade","Trade school","In it or just finished"],["cc","Community college","Any program, any year"],["switch","Switching careers","Coming from another line of work"],["vet","Military veteran","Or transitioning out"]];
+const PATHS={
+  turbine:{learn:["Site safety and lockout","Genset checks and load testing","Helping set and start turbines"],from:"Power plants, oil fields, backup power"},
+  electrical:{learn:["Conduit, pulling and terminating","Reading drawings","Switchgear and busway installs"],from:"The trade data centers need most"},
+  hvac:{learn:["Chiller and CRAH rounds","Pipe and process water loops","Liquid cooling for GPU racks"],from:"Commercial HVAC, hospitals, plants"},
+  networks:{learn:["Rack and stack","Copper and fiber cabling","Testing, labeling, burn-in"],from:"Fastest way onto a data center floor"}
+};
+const STATES=["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","District of Columbia","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"];
+const AJC="https://www.careeronestop.org/LocalHelp/AmericanJobCenters/find-american-job-centers.aspx";
+/* local workforce boards for the counties around major data center sites */
+const COUNTIES={
+  "Arizona":{"Maricopa":"ARIZONA@WORK Maricopa County","Pima":"ARIZONA@WORK Pima County","Pinal":"ARIZONA@WORK Pinal County"},
+  "Texas":{"Dallas":"Workforce Solutions Greater Dallas","Taylor (Abilene)":"Workforce Solutions of West Central Texas","Travis (Austin)":"Workforce Solutions Capital Area","Ellis":"Workforce Solutions for North Central Texas"},
+  "Ohio":{"Franklin (Columbus)":"OhioMeansJobs Columbus-Franklin County","Licking (New Albany)":"OhioMeansJobs Licking County"},
+  "Virginia":{"Loudoun":"Virginia Career Works Northern Region","Prince William":"Virginia Career Works Northern Region","Fairfax":"Virginia Career Works Northern Region"},
+  "Georgia":{"Douglas":"WorkSource Atlanta Regional","Fulton":"WorkSource Fulton"},
+  "Washington":{"Grant (Quincy)":"SkillSource","King (Seattle)":"Workforce Development Council of Seattle-King County"},
+  "Florida":{"Orange (Orlando)":"CareerSource Central Florida","Hillsborough (Tampa)":"CareerSource Tampa Bay"},
+  "New Jersey":{"Camden":"Camden County American Job Center"}
+};
+const STATE_FUNDS={
+  "Texas":[{id:"tx133",name:"Apprenticeship Training Program (Chapter 133)",by:"Texas Workforce Commission",pays:"Part of the cost of classroom instruction for registered apprentices.",who:"Registered apprentices in Texas.",how:"Paid to the school or apprenticeship committee that runs your classes, which lowers your fees.",url:"https://www.twc.texas.gov/sites/default/files/wf/docs/2025-apprenticeship-cost-study-twc.pdf"}],
+  "Arizona":[{id:"azbuild",name:"BuildItAZ",by:"Arizona Office of Economic Opportunity",pays:"Grants to registered construction and trades apprenticeship programs, including first-year tuition and books for new apprentices.",who:"New apprentices in participating programs, such as the Phoenix and Tucson electrical apprenticeship programs.",how:"Through the apprenticeship program you join.",url:"https://azgovernor.gov/node/6291"}],
+  "Ohio":[{id:"ohtech",name:"TechCred",by:"Ohio Department of Development",pays:"Up to $2,000 per approved tech credential.",who:"Ohio workers whose employer applies for them.",how:"Reimbursed to your employer. As your employer, Rackcrew can apply for you.",url:"https://fordhaminstitute.org/ohio/commentary/techcred-overview-ohios-promising-new-credential-reimbursement-program"}],
+  "Virginia":[{id:"vaff",name:"FastForward",by:"Virginia’s Community Colleges",pays:"About two-thirds of the cost of short-term credential training at community colleges.",who:"Virginia residents of at least one year.",how:"Taken off your bill when you enroll; you finish the class and sit the credential exam.",url:"https://laurelridgeworkforce.com/fastforward-quick-facts"}],
+  "Georgia":[{id:"gahope",name:"HOPE Career Grant",by:"Technical College System of Georgia",pays:"With the HOPE Grant, all tuition in high-demand programs such as Electrical Lineman Technology, Industrial Maintenance and Computer Technology. Fees and equipment aren’t covered.",who:"Georgia residents who qualify for the HOPE Grant.",how:"Applied to your tuition at a Georgia technical college.",url:"https://www.tcsg.edu/free-tuition/"}],
+  "Washington":[{id:"wacg",name:"Washington College Grant for apprentices",by:"Washington Student Achievement Council",pays:"Tuition, fees and materials. Up to $2,548 for 2026–27, depending on income and family size.",who:"Washington residents in an approved apprenticeship program, under the income limits.",how:"Paid toward your apprenticeship classes.",url:"https://wsac.wa.gov/node/428"}],
+  "Florida":[{id:"flpcog",name:"Pathways to Career Opportunities Grant",by:"Florida Department of Education",pays:"Grants to pre-apprenticeship and apprenticeship programs to add seats and cover training costs.",who:"Students in participating Florida programs.",how:"Through the program you join.",url:"https://cdn.fldoe.org/pathwaysgrant/"}],
+  "New Jersey":[{id:"njgains",name:"GAINS",by:"New Jersey Department of Labor",pays:"Grants to employers that start or grow registered apprenticeships, which offsets training costs.",who:"Apprentices hired by participating employers.",how:"Paid to the employer running the apprenticeship.",url:"https://www.nj.gov/labor/assets/PDFs/Grants/FY27/GAINS%20FY27%20R1%20NGO%20Final.pdf"}]
+};
+const WIOA={id:"wioa",lvl:"local",name:"WIOA training account",pays:"Tuition and fees for approved training programs. Some areas also help with tools, transport or childcare.",who:"Adults and young adults who meet local rules. Low-income residents and veterans come first.",how:"You apply at your local job center. We help you pick an approved program and bring the paperwork.",url:AJC};
+const GIBILL={id:"gibill",lvl:"fed",name:"GI Bill for apprenticeships",by:"U.S. Department of Veterans Affairs",pays:"A monthly housing allowance while you train in a VA-approved apprenticeship or on-the-job program.",who:"Veterans and family members with GI Bill benefits left.",how:"Paid to you each month you’re in the program.",url:"https://www.va.gov/education/"};
+
+const S={step:1,stage:null,adult:false,diploma:null,license:null,trade:null,state:"",county:"",help:new Set(),name:"",phone:"",email:"",start:"now",startDate:iso(addDays(today,60)),err:""};
+
+function funds(){
+  if(!S.state) return [];
+  const board=COUNTIES[S.state]?.[S.county];
+  const list=[{...WIOA, by: board ? `${board}, your local job center` : (S.county==="other"||!COUNTIES[S.state] ? "Your county’s American Job Center" : "Your county’s American Job Center")}];
+  (STATE_FUNDS[S.state]||[]).forEach(f=>list.push({...f,lvl:"state"}));
+  if(S.stage==="vet") list.push(GIBILL);
+  return list;
+}
+
+function render(){
+  $("#progress").innerHTML=S.step<=N?progress(S.step,N):"";
+  ({1:stepYou,2:stepPath,3:stepFunds,4:stepContact,5:stepDone})[S.step]();
+  renderBar();
+}
+function hero(t,p){ $("#hero").innerHTML=`<div class="hero"><h1 class="display">${t}</h1>${p?`<p>${p}</p>`:""}</div>`; }
+function radio(group,val,items){ return items.map(([k,l,d])=>`<button type="button" class="opt" role="radio" data-${group}="${k}" aria-pressed="${val===k}" aria-checked="${val===k}"><span class="mk"></span><span><b>${l}</b>${d?`<span>${d}</span>`:""}</span></button>`).join(""); }
+function bindRadio(group,key){ $$(`[data-${group}]`).forEach(b=>b.onclick=()=>{S[key]=b.dataset[group]; S.err=""; $$(`[data-${group}]`).forEach(x=>{x.setAttribute("aria-pressed",x===b); x.setAttribute("aria-checked",x===b);}); renderBar();}); }
+
+function stepYou(){
+  hero("Learn a trade on a real site. Get paid from day one.","Rackcrew apprentices join crews building data centers, working next to a lead who teaches them. Many states will help pay your training fees.");
+  $("#app").innerHTML=`
+  <div class="q"><div class="label" id="stl">Where are you now?</div><div class="opts" role="radiogroup" aria-labelledby="stl">${radio("stage",S.stage,STAGES)}</div></div>
+  <div class="q"><div class="label" id="dl">High school diploma or GED?</div><div class="hint">Most apprenticeship programs ask for one.</div>
+    <div class="seg" role="radiogroup" aria-labelledby="dl">${[["yes","Yes"],["soon","Finishing this year"],["no","Not yet"]].map(([k,l])=>`<button type="button" role="radio" data-dip="${k}" aria-pressed="${S.diploma===k}" aria-checked="${S.diploma===k}">${l}</button>`).join("")}</div></div>
+  <div class="q"><div class="label" id="lcl">Driver’s license?</div><div class="hint">Sites are often outside town. It helps, but it’s not required.</div>
+    <div class="seg" role="radiogroup" aria-labelledby="lcl">${[["yes","Yes"],["no","No"]].map(([k,l])=>`<button type="button" role="radio" data-lic="${k}" aria-pressed="${S.license===k}" aria-checked="${S.license===k}">${l}</button>`).join("")}</div></div>
+  <div class="q"><button type="button" class="opt multi" role="checkbox" id="adult" aria-pressed="${S.adult}" aria-checked="${S.adult}" style="max-width:520px"><span class="mk"></span><span><b>I’m 18 or older</b><span>Job sites require it.</span></span></button></div>`;
+  bindRadio("stage","stage");
+  [["dip","diploma"],["lic","license"]].forEach(([g,k])=>$$(`[data-${g}]`).forEach(b=>b.onclick=()=>{S[k]=b.dataset[g]; $$(`[data-${g}]`).forEach(x=>{x.setAttribute("aria-pressed",x===b);x.setAttribute("aria-checked",x===b);}); S.err=""; renderBar();}));
+  $("#adult").onclick=e=>{S.adult=!S.adult; e.currentTarget.setAttribute("aria-pressed",S.adult); e.currentTarget.setAttribute("aria-checked",S.adult); S.err=""; renderBar();};
+}
+
+function stepPath(){
+  hero("Pick a trade to learn.","You can switch later. Every path starts with safety and tools, then real work under a lead.");
+  const P=S.trade?PATHS[S.trade]:null, T=S.trade?TRADES[S.trade]:null;
+  $("#app").innerHTML=`
+  <div class="q"><div class="tiles" role="group" aria-label="Trades">${Object.entries(TRADES).map(([k,t])=>`<button type="button" class="tile" data-trade="${k}" aria-pressed="${S.trade===k}" style="background:${t.color};color:${t.ink}"><span class="ic">${icon(k,22,t.ink)}</span><span><span class="nm">${t.short}</span><span class="sub" style="display:block">${PATHS[k].from}</span></span></button>`).join("")}</div></div>
+  ${P?`<div class="two">
+    <div class="panel"><div class="sec">What you learn first</div><ul class="past" style="margin-top:10px;font-size:16px">${P.learn.map(l=>`<li><span>${l}</span></li>`).join("")}</ul>
+      <div class="sec" style="margin-top:18px">How it grows</div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px">${["Apprentice","Journeyman","Lead"].map((s,i)=>`${i?`<svg width="20" height="12" viewBox="0 0 20 12" aria-hidden="true"><path d="M1 6h16M12 1l5 5-5 5" fill="none" stroke="${T.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`:""}<span class="tag" style="${i===0?`background:${T.color};color:${T.ink}`:""}">${s}</span>`).join("")}</div>
+      <p class="note" style="margin-top:12px">Your hours on site count toward a registered apprenticeship. [Hours and years by trade and state to confirm]</p></div>
+    <div class="panel"><div class="sec">Who you’ll work with</div>
+      <div class="who" style="margin-top:10px">${avatar(S.trade,{skin:"#9E6444",hat:"hardhat",label:"Crew lead"})}<div><h3>A crew lead</h3><div class="role">10+ years in ${T.short.toLowerCase()}, paid extra to teach</div></div></div>
+      <p style="margin-top:14px">You’re paid hourly from your first shift. Apprentice pay goes up as you log hours and pass skills checks.</p></div>
+  </div>`:""}`;
+  $$("[data-trade]").forEach(b=>b.onclick=()=>{S.trade=b.dataset.trade; S.err=""; render();});
+}
+
+function stepFunds(){
+  hero("Who pays for your training?","Tell us where you live. We’ll show programs in your county and state that can cover classes, fees and tools.");
+  const counties=COUNTIES[S.state];
+  const list=funds();
+  $("#app").innerHTML=`
+  <div class="q"><div class="fields">
+    <div class="field"><label for="st">Your state</label><select id="st" autocomplete="address-level1"><option value="">Choose your state</option>${STATES.map(s=>`<option ${S.state===s?"selected":""}>${s}</option>`).join("")}</select></div>
+    <div class="field"><label for="co">Your county</label>${counties?`<select id="co"><option value="">Choose your county</option>${Object.keys(counties).map(c=>`<option value="${esc(c)}" ${S.county===c?"selected":""}>${esc(c)}</option>`).join("")}<option value="other" ${S.county==="other"?"selected":""}>Another county</option></select>`:`<input id="co" value="${esc(S.county==="other"?"":S.county)}" placeholder="${S.state?"County name":"Choose a state first"}" ${S.state?"":"disabled"}>`}</div>
+  </div></div>
+  <div id="flist">${listHTML(list)}</div>`;
+  $("#st").onchange=e=>{S.state=e.target.value; S.county=""; S.help=new Set(); S.err=""; render();};
+  const co=$("#co"); co.onchange=co.oninput=e=>{S.county=e.target.value; $("#flist").innerHTML=listHTML(funds()); bindFunds(); renderBar();};
+  bindFunds();
+}
+function listHTML(list){
+  if(!S.state) return `<div class="panel note">Pick your state to see what can pay for your training.</div>`;
+  const extra=!STATE_FUNDS[S.state];
+  return `<p class="okbox" style="margin-bottom:14px">${list.length} ${list.length===1?"program":"programs"} may help pay for your training in ${esc(S.state)}. Tick the ones you want help applying for.</p>
+  <div style="display:grid;gap:12px">${list.map(f=>`<article class="fund ${S.help.has(f.id)?"picked":""}" id="f-${f.id}">
+    <div class="hd"><div><h3>${esc(f.name)}</h3><div class="by">${esc(f.by)}</div></div><span class="lvl ${f.lvl}">${{local:"Your county",state:"Your state",fed:"Federal"}[f.lvl]}</span></div>
+    <dl><dt>Pays for</dt><dd>${esc(f.pays)}</dd><dt>Who it’s for</dt><dd>${esc(f.who)}</dd><dt>How it works</dt><dd>${esc(f.how)}</dd></dl>
+    <div class="row2"><button type="button" class="opt multi" role="checkbox" data-help="${f.id}" aria-pressed="${S.help.has(f.id)}" aria-checked="${S.help.has(f.id)}" style="min-height:48px;padding:10px 14px"><span class="mk"></span><span><b>Help me apply</b></span></button><a href="${f.url}" target="_blank" rel="noopener">Official details</a></div>
+  </article>`).join("")}</div>
+  ${extra?`<p class="note" style="margin-top:14px">${esc(S.state)} has its own apprenticeship office too. We’ll check what applies where you live. You can also search <a href="https://www.apprenticeship.gov" target="_blank" rel="noopener">apprenticeship.gov</a>.</p>`:""}
+  ${S.county==="other"||(!COUNTIES[S.state]&&S.state)?`<p class="note" style="margin-top:8px">Find your county’s job center on <a href="${AJC}" target="_blank" rel="noopener">CareerOneStop</a>.</p>`:""}
+  <p class="note" style="margin-top:8px">Programs, amounts and rules change. We confirm what you qualify for before you start; nothing here is a promise of funding.</p>`;
+}
+function bindFunds(){ $$("[data-help]").forEach(b=>b.onclick=()=>{const k=b.dataset.help; S.help.has(k)?S.help.delete(k):S.help.add(k); const on=S.help.has(k); b.setAttribute("aria-pressed",on); b.setAttribute("aria-checked",on); $("#f-"+k).classList.toggle("picked",on); renderBar();}); }
+
+function stepContact(){
+  hero("Where do we reach you?","We’ll call to talk through your trade, your funding and the next crew with an open apprentice seat.");
+  $("#app").innerHTML=`<div class="q"><div class="fields">
+    <div class="field"><label for="nm">Full name</label><input id="nm" autocomplete="name" value="${esc(S.name)}"></div>
+    <div class="field"><label for="ph">Mobile phone</label><input id="ph" type="tel" autocomplete="tel" value="${esc(S.phone)}"></div>
+    <div class="field"><label for="em">Email</label><input id="em" type="email" autocomplete="email" value="${esc(S.email)}"></div></div></div>
+  <div class="q"><div class="label" id="sl">When can you start?</div>
+    <div class="seg" role="radiogroup" aria-labelledby="sl">${[["now","Right away"],["month","Within a month"],["date","On a date"]].map(([k,l])=>`<button type="button" role="radio" data-start="${k}" aria-pressed="${S.start===k}" aria-checked="${S.start===k}">${l}</button>`).join("")}</div>
+    ${S.start==="date"?`<div class="field" style="max-width:280px"><label for="sd">Start date</label><input id="sd" type="date" min="${iso(today)}" value="${S.startDate}"></div>`:""}</div>
+  <div class="panel"><div class="sec">Your summary</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"><span class="tag" style="background:${TRADES[S.trade].color};color:${TRADES[S.trade].ink}">${TRADES[S.trade].name}</span><span class="tag">${esc(STAGES.find(s=>s[0]===S.stage)?.[1]||"")}</span><span class="tag">${esc(S.county&&S.county!=="other"?S.county+" County, ":"")}${esc(S.state)}</span>${[...S.help].map(id=>`<span class="tag">Help with ${esc(funds().find(f=>f.id===id)?.name||id)}</span>`).join("")}</div></div>`;
+  [["nm","name"],["ph","phone"],["em","email"]].forEach(([id,k])=>$("#"+id).oninput=e=>{S[k]=e.target.value;});
+  $$("[data-start]").forEach(b=>b.onclick=()=>{S.start=b.dataset.start; render();});
+  $("#sd")?.addEventListener("change",e=>S.startDate=e.target.value);
+}
+function stepDone(){
+  $("#hero").innerHTML="";
+  const chosen=funds().filter(f=>S.help.has(f.id));
+  $("#app").innerHTML=`<div style="max-width:640px;margin:0 auto">
+    <div class="done"><h1 class="display">You’re in, ${esc(S.name.split(" ")[0])}.</h1>
+      <p style="margin-top:12px;color:#E8CDBF">We’ll be in touch about ${esc(TRADES[S.trade].name.toLowerCase())} crews with an open apprentice seat${S.state?` in or near ${esc(S.state)}`:""}.</p>
+      <ol class="next"><li><span class="n">1</span><span>We call to talk through your goals and check the basics.</span></li>
+      <li><span class="n">2</span><span>${chosen.length?`We help you apply for ${chosen.map(f=>esc(f.name)).join(", ")}.`:"We look for training funds you qualify for."}</span></li>
+      <li><span class="n">3</span><span>You start with safety training, then join a crew on site, paid hourly from your first shift.</span></li></ol></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px"><a class="btn" href="/">Back to Rackcrew</a></div>
+    <p class="sample">This preview doesn’t send anything yet.</p></div>`;
+}
+
+function check(){
+  if(S.step===1){ if(!S.stage) return "Tell us where you are now."; if(!S.diploma) return "Answer the diploma or GED question."; if(!S.adult) return "You need to be 18 or older to work on a job site."; }
+  if(S.step===2){ if(!S.trade) return "Pick a trade to learn. You can switch later."; }
+  if(S.step===3){ if(!S.state) return "Choose your state."; }
+  if(S.step===4){ if(!S.name.trim()) return "Add your name."; if(!S.phone.trim()&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(S.email)) return "Add a phone number or a valid email so we can reach you."; }
+  return "";
+}
+function renderBar(){
+  const bar=$("#bar"); if(S.step>N){bar.hidden=true; return;} bar.hidden=false;
+  const labels={1:"Next: pick a trade",2:"Next: training funds",3:S.help.size?`Next: contact (${S.help.size} to apply for)`:"Next: contact",4:"Send my application"};
+  bar.innerHTML=`<div class="in">${S.step>1?`<button class="btn light" type="button" id="back">Back</button>`:""}<div class="msg ${S.err?"err":""}" role="status">${esc(S.err||({1:"About 2 minutes.",2:"Pick the one that sounds most like you.",3:"You can skip funding and sort it out later.",4:"We only use this to reach you."})[S.step])}</div><button class="btn ${S.step===N?"gold":""}" type="button" id="next">${labels[S.step]}</button></div>`;
+  $("#back")?.addEventListener("click",()=>{S.err=""; S.step--; render(); scrollTo(0,0);});
+  $("#next").onclick=()=>{const e=check(); if(e){S.err=e; renderBar(); if(innerWidth<760) inlineErr(e); return;} S.err=""; S.step++; render(); scrollTo(0,0);};
+}
+function inlineErr(msg){ let el=$("#inlineErr"); if(!el){el=document.createElement("p"); el.id="inlineErr"; el.className="warnbox"; el.setAttribute("role","alert"); el.style.marginBottom="16px"; $("#app").prepend(el);} el.textContent=msg; el.scrollIntoView({block:"center",behavior:"smooth"}); }
+
+render();
+})();
+</script>
+</body>
+</html>
