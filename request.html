@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Request a crew | Rackcrew</title>
+<meta name="description" content="Describe your data center build and put together the crew for it, person by person or as a ready-made crew.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&display=swap">
+<style>
+:root{
+  --maroon:#3A1418; --maroon-2:#5A262C; --ink:#2B1013; --ink-2:#6B4A47;
+  --paper:#FFF8F1; --card:#FFFFFF; --line:#EEDFD2; --soft:#F7ECE1;
+  --turbine:#E2A13A; --electrical:#B3141C; --hvac:#E5793D; --networks:#2E3A6E;
+  --ok:#2F7A55; --warn:#A35A00;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Bricolage Grotesque','Arial Narrow',sans-serif;font-size:17px;line-height:1.45}
+h1,h2,h3,p{margin:0}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--turbine);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.condensed{font-weight:800;font-stretch:75%;letter-spacing:-.02em;line-height:.92}
+
+/* top */
+.top{background:var(--maroon);color:#FBEBDC}
+.top nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 0}
+.brand{font-weight:800;font-stretch:75%;font-size:30px;text-decoration:none;letter-spacing:-.01em}
+.steps{display:flex;gap:6px;list-style:none;margin:0;padding:0;font-size:14px}
+.steps li{padding:6px 12px;border-radius:999px;border:1.5px solid var(--maroon-2);color:#D9B9AC;white-space:nowrap}
+.steps li.on{background:#FBEBDC;color:var(--maroon);border-color:#FBEBDC;font-weight:700}
+.steps li.done{color:#FBEBDC;border-color:#8B4A50}
+.hero{padding:28px 0 36px}
+.hero h1{font-size:clamp(44px,8vw,92px);max-width:11ch}
+.hero p{margin-top:14px;color:#E8CDBF;max-width:34em;font-size:19px}
+
+/* describe box */
+.ask{margin-top:26px;background:#FBEBDC;color:var(--ink);border-radius:24px;padding:16px;box-shadow:0 18px 40px -24px #000}
+.ask label{display:block;font-weight:700;font-size:15px;color:var(--ink-2);margin:2px 4px 8px}
+.ask-row{display:flex;gap:10px;align-items:flex-end}
+.ask textarea{flex:1;min-height:58px;max-height:160px;resize:vertical;border:0;background:#fff;border-radius:16px;padding:14px 16px;font-size:18px;line-height:1.35}
+.ask textarea::placeholder{color:#A08A84}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 22px;border-radius:999px;border:0;background:var(--maroon);color:#FBEBDC;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{filter:brightness(1.12)}
+.btn.light{background:#fff;color:var(--maroon);border:1.5px solid var(--line)}
+.btn.gold{background:var(--turbine);color:#3A1A0C}
+.btn[disabled]{opacity:.45;cursor:not-allowed;filter:none}
+.ask-try{display:flex;flex-wrap:wrap;gap:8px;margin:12px 4px 2px;font-size:14px;color:var(--ink-2)}
+.ask-try button{border:1px dashed #C9A99A;background:transparent;border-radius:999px;padding:6px 12px;cursor:pointer;color:var(--ink-2)}
+.understood{margin-top:14px;padding:12px 4px 2px;border-top:1px solid #EBD3C3}
+.understood .lead{font-size:14px;color:var(--ink-2);margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:7px 8px 7px 12px;border-radius:999px;background:#fff;border:1.5px solid var(--line);font-size:15px}
+.chip b{font-weight:700}
+.chip button{width:24px;height:24px;border-radius:50%;border:0;background:var(--soft);cursor:pointer;line-height:1;font-size:15px;color:var(--ink-2)}
+.chip.trade{color:#fff;border-color:transparent}
+
+/* mode tabs */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:26px 0 8px}
+.mode{display:flex;gap:14px;align-items:flex-start;text-align:left;padding:16px;border-radius:20px;border:2px solid var(--line);background:var(--card);cursor:pointer}
+.mode[aria-pressed="true"]{border-color:var(--maroon);box-shadow:0 0 0 2px var(--maroon) inset}
+.mode .t{font-weight:800;font-stretch:80%;font-size:22px;line-height:1.05}
+.mode .d{font-size:15px;color:var(--ink-2);margin-top:4px}
+.mode .ic{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--soft)}
+
+/* filters */
+.filters{display:flex;gap:8px;overflow-x:auto;padding:10px 0 14px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.fbtn{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 16px 8px 8px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-weight:600;font-size:15px}
+.fbtn .dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center}
+.fbtn[aria-pressed="true"]{color:#fff;border-color:transparent}
+.fbtn.plain{padding:8px 16px}
+.count{font-size:15px;color:var(--ink-2);margin:2px 0 14px}
+
+/* person cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:14px}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.card.picked{border-color:var(--maroon);box-shadow:0 0 0 1.5px var(--maroon) inset}
+.who{display:flex;gap:14px;align-items:center}
+.ava{position:relative;flex:none;width:68px;height:68px}
+.ava svg.face{width:68px;height:68px;border-radius:50%;display:block}
+.ava .badge{position:absolute;right:-4px;bottom:-2px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:3px solid #fff}
+.who h3{font-size:20px;font-weight:800;font-stretch:85%;line-height:1.1}
+.who .role{font-size:15px;color:var(--ink-2)}
+.who .meta{font-size:14px;color:var(--ink-2);margin-top:2px}
+.facts{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:13px;padding:4px 10px;border-radius:999px;background:var(--soft);color:#5A3A36}
+.tag.hit{background:#E9F3EC;color:var(--ok);font-weight:700}
+.past{margin:0;padding:0;list-style:none;display:grid;gap:6px;font-size:15px}
+.past li{display:flex;gap:10px}
+.past li::before{content:"";flex:none;width:8px;height:8px;border-radius:2px;margin-top:7px;background:var(--line)}
+.past .y{color:var(--ink-2);margin-left:auto;padding-left:8px;white-space:nowrap;font-size:14px}
+.card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:4px;border-top:1px solid var(--soft)}
+.rate{font-weight:800;font-size:22px;font-stretch:85%}
+.rate small{font-weight:500;font-size:14px;color:var(--ink-2);font-stretch:100%}
+.avail{font-size:14px}
+.avail.ok{color:var(--ok)} .avail.late{color:var(--warn)}
+.sec{font-size:13px;font-weight:700;color:var(--ink-2)}
+
+/* crews */
+.crew{background:var(--card);border:1.5px solid var(--line);border-radius:24px;overflow:hidden;display:flex;flex-direction:column}
+.crew-top{padding:18px;color:#fff}
+.crew-top .phase{font-size:14px;opacity:.9}
+.crew-top h3{font-size:32px;margin-top:4px}
+.stack{display:flex;margin-top:14px}
+.stack .ava{width:46px;height:46px;margin-right:-10px}
+.stack .ava svg.face{width:46px;height:46px;border:3px solid rgba(255,255,255,.9)}
+.crew-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:12px;flex:1}
+.mix{display:flex;flex-wrap:wrap;gap:6px}
+
+/* bottom bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(255,248,241,.92);backdrop-filter:blur(10px);border-top:1px solid var(--line);transform:translateY(110%);transition:transform .25s ease}
+.bar.show{transform:none}
+.bar:not(.show){visibility:hidden}
+.bar .in{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.bar .stack{margin:0}
+.bar .stack .ava{width:38px;height:38px}
+.bar .stack .ava svg.face{width:38px;height:38px;border-color:#fff}
+.bar .sum{flex:1;min-width:0;font-size:15px;line-height:1.25}
+.bar .sum b{font-size:17px}
+main{padding-bottom:120px}
+
+/* schedule */
+.panel{background:var(--card);border:1.5px solid var(--line);border-radius:24px;padding:18px}
+.two{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+.field{display:grid;gap:6px}
+.field label{font-weight:700;font-size:15px}
+.field input,.field select,.field textarea{min-height:48px;border:1.5px solid var(--line);border-radius:14px;padding:10px 14px;background:#fff}
+.field textarea{min-height:96px;resize:vertical}
+.row{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--soft)}
+.row:first-child{border-top:0}
+.row .ava{width:46px;height:46px}
+.row .ava svg.face{width:46px;height:46px}
+.row .ava .badge{width:22px;height:22px;border-width:2px}
+.row .nm{flex:1;min-width:0}
+.row .nm b{display:block;font-size:17px}
+.row .nm span{font-size:14px;color:var(--ink-2)}
+.row .r{text-align:right;font-size:15px;white-space:nowrap}
+.rm{border:0;background:transparent;color:var(--ink-2);cursor:pointer;text-decoration:underline;font-size:14px;padding:4px}
+.total{display:grid;gap:8px;font-size:16px}
+.total div{display:flex;justify-content:space-between;gap:10px}
+.total .big{font-weight:800;font-stretch:85%;font-size:30px;padding-top:8px;border-top:1.5px solid var(--line)}
+.note{font-size:14px;color:var(--ink-2)}
+.warnbox{background:#FFF1DE;border-radius:14px;padding:10px 14px;font-size:15px;color:#6E3D00}
+.okbox{background:#E9F3EC;border-radius:14px;padding:10px 14px;font-size:15px;color:#1F5A3D}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{min-height:44px;padding:8px 16px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--maroon);color:#FBEBDC;border-color:var(--maroon)}
+.h2{font-size:clamp(34px,5vw,56px)}
+.sample{font-size:13px;color:var(--ink-2);text-align:center;padding:28px 0 0}
+.done-hero{background:var(--maroon);color:#FBEBDC;border-radius:28px;padding:32px 22px}
+.next{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:12px}
+.next li{display:flex;gap:12px;align-items:flex-start}
+.next .n{flex:none;width:32px;height:32px;border-radius:50%;background:#FBEBDC;color:var(--maroon);display:grid;place-items:center;font-weight:800}
+.empty{padding:28px;border:1.5px dashed var(--line);border-radius:22px;text-align:center;color:var(--ink-2)}
+
+@media (max-width:760px){
+  .steps li:not(.on){display:none}
+  .modes{grid-template-columns:1fr}
+  .two{grid-template-columns:1fr}
+  .two .panel{position:static!important}
+  .ask-row{flex-direction:column;align-items:stretch}
+  .hero{padding-bottom:28px}
+  .bar .stack{display:none}
+}
+@media (prefers-reduced-motion:reduce){.bar{transition:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <nav aria-label="Main">
+      <a class="brand" href="/">Rackcrew</a>
+      <ol class="steps" id="steps" aria-label="Progress"></ol>
+    </nav>
+  </div>
+  <div class="wrap" id="hero"></div>
+</header>
+<main class="wrap" id="app" aria-live="polite"></main>
+<div class="bar" id="bar" role="region" aria-label="Your crew"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- reference data ---------- */
+const TRADES = {
+  turbine:   {name:"Turbine & power", short:"Turbine", color:"#E2A13A", ink:"#3A1A0C", skin2:"#C8692A"},
+  electrical:{name:"Electrical",      short:"Electrical", color:"#B3141C", ink:"#FFFFFF", skin2:"#E8473B"},
+  hvac:      {name:"HVAC & cooling",  short:"HVAC", color:"#E5793D", ink:"#2E1005", skin2:"#F7CDA6"},
+  networks:  {name:"Networks & GPU",  short:"Networks", color:"#2E3A6E", ink:"#FFFFFF", skin2:"#E3E7F6"}
+};
+const ICON = {
+  turbine:'<circle cx="12" cy="12" r="2.2"/><path d="M12 9.8C12 6 13.6 3.6 16 3.4M14.1 13.1C17.4 15 18.6 17.6 17.5 19.8M9.9 13.1C6.6 15 3.8 14.8 2.5 12.8"/>',
+  electrical:'<path d="M13 2.5 5.5 13.5h5.5L10 21.5l8-11h-5.5z"/>',
+  hvac:'<path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6M9.5 4.2 12 6.5l2.5-2.3M9.5 19.8 12 17.5l2.5 2.3"/>',
+  networks:'<circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M6.8 7.3 10.6 16M17.2 7.3 13.4 16M7.2 6h9.6"/>'
+};
+const SPECIALTIES = [
+  {id:"gpu",      label:"GPU cluster install", trade:"networks", words:["gpu","gpus","chipset","chip","chips","nvidia","blackwell","h100","h200","b200","gb200","nvl72","dgx","accelerator","ai cluster","superpod"]},
+  {id:"rack",     label:"Rack and stack",      trade:"networks", words:["rack and stack","rack & stack","racking","stack","server install","servers","deployment"]},
+  {id:"fiber",    label:"Fiber splicing",      trade:"networks", words:["fiber","fibre","splice","splicing","otdr","optical","infiniband","cabling","cable","low voltage"]},
+  {id:"liquid",   label:"Liquid cooling",      trade:"hvac",     words:["liquid","cdu","direct-to-chip","direct to chip","immersion","cold plate"]},
+  {id:"chiller",  label:"Chillers and CRAH",   trade:"hvac",     words:["chiller","chillers","crah","crac","hvac","cooling","mechanical","bms","controls"]},
+  {id:"switchgear",label:"Switchgear and UPS", trade:"electrical",words:["switchgear","ups","busway","pdu","transformer","transformers","electrical","electrician","electricians","wiring"]},
+  {id:"substation",label:"Substation and HV",  trade:"electrical",words:["substation","high voltage","hv","lineman","linemen","grid","interconnect","utility"]},
+  {id:"turbines", label:"Gas turbines",        trade:"turbine",  words:["turbine","turbines","gas","behind the meter","behind-the-meter","on-site power","onsite power","prime power"]},
+  {id:"gensets",  label:"Gensets and backup",  trade:"turbine",  words:["genset","gensets","generator","generators","backup power","diesel","bess","battery"]},
+  {id:"commission",label:"Commissioning",      trade:null,       words:["commission","commissioning","cx","startup","start-up","l5","integrated systems test","ist"]}
+];
+const PHASES = [
+  {id:"power",  name:"On-site power",        trade:"turbine"},
+  {id:"grid",   name:"Grid and substation",  trade:"electrical"},
+  {id:"fitout", name:"Electrical fit-out",   trade:"electrical"},
+  {id:"cooling",name:"Cooling",              trade:"hvac"},
+  {id:"gpu",    name:"Network and GPU install", trade:"networks"},
+  {id:"cx",     name:"Commissioning",        trade:null}
+];
+const PLACES = [
+  {name:"Phoenix, AZ", keys:["phoenix","phx","arizona","az","mesa","chandler","goodyear","buckeye","tempe"]},
+  {name:"Dallas, TX", keys:["dallas","fort worth","dfw","texas","tx","plano","red oak"]},
+  {name:"Abilene, TX", keys:["abilene"]},
+  {name:"Austin, TX", keys:["austin","san antonio","taylor"]},
+  {name:"Northern Virginia", keys:["ashburn","northern virginia","nova","virginia","va","loudoun","manassas"]},
+  {name:"Columbus, OH", keys:["columbus","new albany","ohio","oh"]},
+  {name:"Atlanta, GA", keys:["atlanta","georgia","ga","douglasville"]},
+  {name:"Quincy, WA", keys:["quincy","washington","wenatchee","moses lake"]},
+  {name:"Hillsboro, OR", keys:["hillsboro","oregon","portland","the dalles"]},
+  {name:"Reno, NV", keys:["reno","nevada","nv","las vegas","storey county"]},
+  {name:"Chicago, IL", keys:["chicago","illinois","elk grove"]}
+];
+
+/* sample people (fictional) */
+const P = (o)=>o;
+const PEOPLE = [
+  P({id:"p1", name:"Marisol Vega", trade:"networks", role:"GPU deployment lead", base:"Phoenix, AZ", years:11, rate:82, availIn:21, skin:"#B97650", hat:"bun",
+     spec:["gpu","rack","commission"], builds:4,
+     past:[["Led rack and stack for a 40 MW GPU hall","2026"],["Liquid-cooled GPU racks, 1,100 nodes","2025"],["Network fit-out, hyperscale campus","2023"]],
+     pedigree:["Ex-Navy electronics tech","CompTIA Server+","OSHA 30"]}),
+  P({id:"p2", name:"Darnell Brooks", trade:"networks", role:"GPU cluster technician", base:"Mesa, AZ", years:6, rate:68, availIn:12, skin:"#5E3324", hat:"cap",
+     spec:["gpu","rack"], builds:3,
+     past:[["GPU rack install and burn-in, 24 MW","2026"],["Rack and stack, colo expansion","2025"]],
+     pedigree:["BICSI Installer 2","OSHA 10"]}),
+  P({id:"p3", name:"Anh Tran", trade:"networks", role:"Fiber splicer", base:"Dallas, TX", years:9, rate:64, availIn:5, skin:"#C98A64", hat:"beanie",
+     spec:["fiber"], builds:5,
+     past:[["High-count fiber backbone, 3 data halls","2026"],["InfiniBand cabling, GPU cluster","2025"]],
+     pedigree:["FOA certified splicer","Ex-telecom field crew"]}),
+  P({id:"p4", name:"Keith Okafor", trade:"networks", role:"Structured cabling tech", base:"Phoenix, AZ", years:4, rate:52, availIn:30, skin:"#663521", hat:"hardhat",
+     spec:["fiber","rack"], builds:2,
+     past:[["Copper and fiber cabling, 18 MW hall","2026"],["Patch and label, colo fit-out","2025"]],
+     pedigree:["BICSI Technician","Trade school grad"]}),
+  P({id:"p5", name:"Ray Castillo", trade:"electrical", role:"Journeyman electrician, lead", base:"Phoenix, AZ", years:17, rate:88, availIn:14, skin:"#9E6444", hat:"hardhat",
+     spec:["switchgear","commission"], builds:6,
+     past:[["Ran electrical crew of 14, 60 MW campus","2026"],["Busway and PDU install, 2 data halls","2024"],["Industrial plant electrical","2019"]],
+     pedigree:["AZ journeyman license","NFPA 70E","Ex-semiconductor fab"]}),
+  P({id:"p6", name:"Tasha Greene", trade:"electrical", role:"Switchgear and UPS tech", base:"Dallas, TX", years:12, rate:84, availIn:9, skin:"#45231A", hat:"hardhat",
+     spec:["switchgear","commission"], builds:4,
+     past:[["Switchgear startup, 4 MW blocks x 12","2026"],["UPS replacement, live facility","2025"]],
+     pedigree:["NETA Level III","Ex-OEM field service"]}),
+  P({id:"p7", name:"Luis Ortega", trade:"electrical", role:"Substation lineman", base:"Abilene, TX", years:14, rate:92, availIn:40, skin:"#B06E4E", hat:"hardhat",
+     spec:["substation"], builds:3,
+     past:[["345 kV substation tie-in for data campus","2025"],["Storm restoration, utility crews","2023"]],
+     pedigree:["Utility lineman, 12 yrs","CDL Class A"]}),
+  P({id:"p8", name:"Jordan Pike", trade:"electrical", role:"Electrical apprentice", base:"Phoenix, AZ", years:1, rate:31, availIn:7, skin:"#C98A64", hat:"cap",
+     spec:["switchgear"], builds:1, apprentice:true,
+     past:[["Conduit and pull, 30 MW hall (with Ray C.)","2026"]],
+     pedigree:["Registered apprentice, year 1","OSHA 10"]}),
+  P({id:"p9", name:"Priya Raman", trade:"hvac", role:"Liquid cooling specialist", base:"Phoenix, AZ", years:8, rate:86, availIn:18, skin:"#9E6444", hat:"bun",
+     spec:["liquid","commission"], builds:3,
+     past:[["CDU install and flush, 1,000 GPU racks","2026"],["Direct-to-chip retrofit, HPC lab","2024"]],
+     pedigree:["Ex-chemical plant engineer","EPA 608 Universal"]}),
+  P({id:"p10", name:"Mike Sorensen", trade:"hvac", role:"Chiller technician", base:"Dallas, TX", years:19, rate:78, availIn:3, skin:"#E0A47E", hat:"cap",
+     spec:["chiller"], builds:7,
+     past:[["Chiller plant, 5 x 1,500-ton units","2025"],["CRAH install, colo expansion","2024"]],
+     pedigree:["EPA 608 Universal","Ex-hospital plant lead"]}),
+  P({id:"p11", name:"Grace Hollis", trade:"hvac", role:"Controls and BMS tech", base:"Columbus, OH", years:10, rate:80, availIn:25, skin:"#F0C2A0", hat:"beanie",
+     spec:["chiller","commission"], builds:4,
+     past:[["BMS integration, 3-building campus","2026"],["Controls commissioning, 48 MW","2025"]],
+     pedigree:["Building automation, 10 yrs","Niagara 4 certified"]}),
+  P({id:"p12", name:"Eli Watts", trade:"turbine", role:"Gas turbine technician", base:"Abilene, TX", years:15, rate:96, availIn:10, skin:"#B97650", hat:"hardhat",
+     spec:["turbines","commission"], builds:3,
+     past:[["On-site gas turbines, 200 MW behind the meter","2026"],["Turbine overhaul, combined-cycle plant","2023"]],
+     pedigree:["Ex-power plant, 11 yrs","OEM turbine training"]}),
+  P({id:"p13", name:"Sam Duarte", trade:"turbine", role:"Genset and BESS tech", base:"Phoenix, AZ", years:7, rate:74, availIn:16, skin:"#8A4B32", hat:"cap",
+     spec:["gensets"], builds:5,
+     past:[["40 diesel gensets, load bank tested","2026"],["Battery storage install, 50 MWh","2025"]],
+     pedigree:["EGSA certified","Ex-oil field electrician"]}),
+  P({id:"p14", name:"Nadia Petrov", trade:"turbine", role:"Commissioning engineer", base:"Northern Virginia", years:13, rate:110, availIn:35, skin:"#F0C2A0", hat:"hardhat",
+     spec:["commission","turbines","gensets"], builds:8,
+     past:[["Level 5 integrated systems test, 72 MW","2026"],["Power train commissioning, 3 campuses","2024"]],
+     pedigree:["PE, electrical","Ex-EPC commissioning lead"]}),
+  P({id:"p15", name:"Theo Mensah", trade:"networks", role:"Network apprentice", base:"Phoenix, AZ", years:1, rate:29, availIn:4, skin:"#45231A", hat:"beanie",
+     spec:["rack"], builds:1, apprentice:true,
+     past:[["Rack and stack, 18 MW hall (with Marisol V.)","2026"]],
+     pedigree:["Community college, IT","Registered apprentice"]}),
+  P({id:"p16", name:"Rosa Lindqvist", trade:"hvac", role:"Pipefitter", base:"Phoenix, AZ", years:9, rate:72, availIn:11, skin:"#E0A47E", hat:"hardhat",
+     spec:["liquid","chiller"], builds:3,
+     past:[["Process water loop for liquid cooling","2026"],["Refinery piping turnarounds","2022"]],
+     pedigree:["UA journeyman pipefitter","Ex-refinery"]})
+];
+const CREWS = [
+  {id:"c1", name:"Desert Current", phase:"fitout", base:"Phoenix, AZ", members:["p5","p8","p4"], extra:"plus 3 journeymen", size:6, builds:4, availIn:14,
+   blurb:"Ran electrical fit-out together on four data halls in the Valley."},
+  {id:"c2", name:"Lightpath", phase:"gpu", base:"Phoenix, AZ", members:["p1","p2","p15","p4"], extra:"", size:4, builds:3, availIn:21,
+   blurb:"GPU rack and stack, cabling and burn-in. Has done liquid-cooled racks."},
+  {id:"c3", name:"Cold Aisle", phase:"cooling", base:"Phoenix, AZ", members:["p9","p16","p10"], extra:"plus 2 helpers", size:5, builds:3, availIn:18,
+   blurb:"Chillers, process loops and CDUs for direct-to-chip cooling."},
+  {id:"c4", name:"Spin-Up", phase:"power", base:"Abilene, TX", members:["p12","p13","p14"], extra:"plus 2 techs", size:5, builds:3, availIn:16,
+   blurb:"Behind-the-meter gas turbines and backup gensets, set and started."},
+  {id:"c5", name:"Tie-In", phase:"grid", base:"Abilene, TX", members:["p7","p6"], extra:"plus 4 linemen", size:6, builds:3, availIn:40,
+   blurb:"Substation and high-voltage interconnect for new campuses."},
+  {id:"c6", name:"Final Mile", phase:"cx", base:"Dallas, TX", members:["p14","p6","p11"], extra:"", size:3, builds:5, availIn:30,
+   blurb:"Level 1 to 5 commissioning across power, cooling and controls."}
+];
+const byId = Object.fromEntries(PEOPLE.map(p=>[p.id,p]));
+const HOURS = 40;
+
+/* ---------- helpers ---------- */
+const $ = (s,el=document)=>el.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const today = new Date(); today.setHours(0,0,0,0);
+const addDays=(d,n)=>{const x=new Date(d); x.setDate(x.getDate()+n); return x;};
+const fmt=d=>d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+const fmtLong=d=>d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+const iso=d=>d.toISOString().slice(0,10);
+const money=n=>"$"+Math.round(n).toLocaleString("en-US");
+const daysBetween=(a,b)=>Math.round((b-a)/864e5);
+const availDate=p=>addDays(today,p.availIn);
+const placeOf=base=>PLACES.find(pl=>pl.name===base||pl.keys.some(k=>base.toLowerCase().includes(k)))?.name||base;
+
+function lev(a,b){const m=a.length,n=b.length; if(Math.abs(m-n)>2) return 9; const d=Array.from({length:m+1},(_,i)=>[i]); for(let j=1;j<=n;j++) d[0][j]=j;
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[m][n];}
+
+function tradeIcon(t,size=16,stroke="#fff"){return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="${stroke}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[t]}</svg>`;}
+
+function face(p){
+  const T=TRADES[p.trade], id="f"+p.id+Math.random().toString(36).slice(2,6);
+  const skinD = shade(p.skin,-0.22);
+  const shirt = T.skin2, band = p.trade==="networks" ? "#FFB347" : "#FFF3DF";
+  let hat="";
+  if(p.hat==="hardhat") hat=`<path d="M25 35C25 18 55 18 55 35Z" fill="#F7E7C6"/><rect x="21" y="32" width="38" height="5" rx="2.5" fill="#F7E7C6"/><path d="M40 21V32" stroke="#DCC79F" stroke-width="2.5" stroke-linecap="round"/>`;
+  if(p.hat==="cap") hat=`<path d="M26 34C26 20 54 20 54 34Z" fill="${shade(T.color,-0.25)}"/><path d="M50 31L64 33Q65 36 62 36L50 35Z" fill="${shade(T.color,-0.4)}"/>`;
+  if(p.hat==="beanie") hat=`<path d="M25 35C25 17 55 17 55 35Z" fill="${shade(T.color,0.25)}"/><rect x="24" y="31" width="32" height="6" rx="3" fill="${shade(T.color,0.1)}"/>`;
+  if(p.hat==="bun") hat=`<circle cx="31" cy="20" r="7" fill="#1E120C"/><path d="M27 38C25 24 38 21 53 28C47 26 39 28 34 35Z" fill="#1E120C"/>`;
+  return `<svg class="face" viewBox="0 0 80 80" role="img" aria-label="Illustrated portrait of ${esc(p.name)}"><defs><clipPath id="${id}"><circle cx="40" cy="40" r="40"/></clipPath></defs><g clip-path="url(#${id})">
+  <rect width="80" height="80" fill="${T.color}"/><rect y="56" width="80" height="24" fill="${shade(T.color,-0.15)}"/>
+  <path d="M10 82C12 62 68 62 70 82Z" fill="${shirt}"/><path d="M10 82C12 62 24 62 26 82Z" fill="${shade(shirt,-0.15)}"/>
+  <path d="M15 72L65 70L66 74L15 76Z" fill="${band}"/>
+  <rect x="35" y="44" width="10" height="16" rx="4" fill="${skinD}"/>
+  <ellipse cx="40" cy="38" rx="13" ry="15" fill="${skinD}"/><ellipse cx="42.5" cy="38" rx="11" ry="14.5" fill="${p.skin}"/>
+  <ellipse cx="47" cy="39" rx="1.7" ry="2" fill="#1E0F0A"/><path d="M45 46Q48 47.5 51 46" stroke="${skinD}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  ${hat}</g></svg>`;
+}
+function shade(hex,amt){const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255;
+  const f=v=>Math.max(0,Math.min(255,Math.round(amt<0?v*(1+amt):v+(255-v)*amt))); return "#"+[f(r),f(g),f(b)].map(v=>v.toString(16).padStart(2,"0")).join("");}
+function ava(p){const T=TRADES[p.trade]; return `<span class="ava">${face(p)}<span class="badge" style="background:${T.color}" title="${esc(T.name)}">${tradeIcon(p.trade,14,T.ink==="#FFFFFF"?"#fff":T.ink)}</span></span>`;}
+
+/* ---------- the describe-it parser ---------- */
+const EXAMPLES = [
+  "I'm building a data center in Phoenix, Arizona and need a GPU chipset expert who has done it before, starting next month",
+  "Liquid cooling crew for 2,000 racks in Dallas, ASAP",
+  "Need switchgear techs and a commissioning engineer in Abilene in 3 weeks"
+];
+function parse(text){
+  const t=" "+text.toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9,\-' ]/g," ")+" ";
+  const words=t.split(/[\s,]+/).filter(Boolean);
+  const out={location:null,trades:new Set(),specs:new Set(),start:null,startLabel:null,veteran:false,phase:null};
+  // location: exact keys, then fuzzy (handles "Phenix")
+  for(const pl of PLACES){ if(pl.keys.some(k=>k.length>2 ? t.includes(" "+k+" ")||t.includes(" "+k+",") : new RegExp("\\b"+k+"\\b").test(t))){out.location=pl.name;break;} }
+  if(!out.location){ outer: for(const w of words){ if(w.length<5) continue; for(const pl of PLACES){ for(const k of pl.keys){ if(k.length>=5 && lev(w,k)<=2){out.location=pl.name;break outer;} } } } }
+  // specialties and trades
+  for(const s of SPECIALTIES){ if(s.words.some(w=>w.includes(" ")? t.includes(w) : words.some(x=>x===w||(w.length>4&&lev(x,w)<=1)))){ out.specs.add(s.id); if(s.trade) out.trades.add(s.trade);} }
+  if(/\b(electric|electrical|electrician)/.test(t)) out.trades.add("electrical");
+  if(/\b(hvac|cooling|mechanical)/.test(t)) out.trades.add("hvac");
+  if(/\b(network|networking|it )/.test(t)) out.trades.add("networks");
+  if(/\b(power|turbine|genset|generator)/.test(t)) out.trades.add("turbine");
+  // a generic word like "cooling" shouldn't also add chillers when liquid was asked for
+  if(out.specs.has("liquid")) out.specs.delete("chiller");
+  if(out.specs.has("gpu")) out.specs.delete("rack");
+  // start date
+  let m;
+  if(/\b(asap|immediately|right away|right now|this week|urgent)\b/.test(t)){out.start=addDays(today,3);out.startLabel="As soon as possible";}
+  else if(/\bnext month\b/.test(t)){const d=new Date(today.getFullYear(),today.getMonth()+1,1);out.start=d;out.startLabel="Next month ("+fmt(d)+")";}
+  else if(/\bnext week\b/.test(t)){out.start=addDays(today,7);out.startLabel="Next week";}
+  else if((m=t.match(/\bin (\d+|two|three|four|six) (week|weeks|month|months)\b/))){const num={two:2,three:3,four:4,six:6}[m[1]]||+m[1]; const days=m[2].startsWith("week")?num*7:num*30; out.start=addDays(today,days); out.startLabel="In "+num+" "+m[2]+" ("+fmt(out.start)+")";}
+  else { const months=["january","february","march","april","may","june","july","august","september","october","november","december"];
+    for(let i=0;i<12;i++){ if(new RegExp("\\b("+months[i]+"|"+months[i].slice(0,3)+")\\b").test(t) && !(months[i]==="may"&&/\bmay (need|want|be)\b/.test(t))){ let y=today.getFullYear(); if(i<today.getMonth()) y++; out.start=new Date(y,i,1); out.startLabel=months[i][0].toUpperCase()+months[i].slice(1)+" "+y; break; } } }
+  // experience
+  if(/(done (it|this|one|that) before|has done|have done|experience|experienced|veteran|proven|before\b|track record|been there)/.test(t)) out.veteran=true;
+  // phase guess for ready crews
+  if(out.specs.has("gpu")||out.specs.has("rack")||out.specs.has("fiber")) out.phase="gpu";
+  else if(out.specs.has("liquid")||out.specs.has("chiller")) out.phase="cooling";
+  else if(out.specs.has("substation")) out.phase="grid";
+  else if(out.specs.has("switchgear")) out.phase="fitout";
+  else if(out.specs.has("turbines")||out.specs.has("gensets")) out.phase="power";
+  else if(out.specs.has("commission")) out.phase="cx";
+  return out;
+}
+
+/* ---------- state ---------- */
+const S = {
+  step:"who", mode:"browse", text:"", parsed:null,
+  trades:new Set(), specs:new Set(), location:null, start:null, startLabel:null, veteran:false, phase:null,
+  cart:[], crew:null, weeks:12, form:{}
+};
+// deep link: /request?trade=electrical or ?mode=crews
+const qs=new URLSearchParams(location.search);
+if(qs.get("trade")&&TRADES[qs.get("trade")]) S.trades.add(qs.get("trade"));
+if(qs.get("mode")==="crews") S.mode="crews";
+
+function applyParsed(p){
+  S.parsed=p; S.trades=new Set(p.trades); S.specs=new Set(p.specs); S.location=p.location;
+  S.start=p.start; S.startLabel=p.startLabel; S.veteran=p.veteran; if(p.phase) S.phase=p.phase;
+}
+
+function score(p){
+  let s=0; const reasons=[];
+  if(S.trades.size && !S.trades.has(p.trade) && ![...S.specs].some(id=>p.spec.includes(id))) return null;
+  const hits=[...S.specs].filter(id=>p.spec.includes(id));
+  if(S.specs.size && !hits.length && S.trades.size===0) return null;
+  s+=hits.length*10;
+  if(S.location){ if(placeOf(p.base)===S.location){s+=8; reasons.push("local");} }
+  if(S.veteran){ if(p.builds>=3){s+=6;} else s-=6; }
+  if(S.start){ if(availDate(p)<=S.start) s+=4; }
+  s+=Math.min(p.builds,6);
+  return {s,hits};
+}
+
+/* ---------- render ---------- */
+function setSteps(){
+  const order=[["who","Who"],["when","When and rate"],["confirm","Confirm"]];
+  const i=order.findIndex(o=>o[0]===S.step);
+  $("#steps").innerHTML=S.step==="sent"?"":order.map((o,k)=>`<li class="${k===i?"on":k<i?"done":""}" ${k===i?'aria-current="step"':""}>${k+1}. ${o[1]}</li>`).join("");
+}
+
+function render(){
+  setSteps();
+  if(S.step==="who") renderWho();
+  if(S.step==="when") renderWhen();
+  if(S.step==="confirm") renderConfirm();
+  if(S.step==="sent") renderSent();
+  renderBar();
+}
+
+function renderHeroWho(){
+  $("#hero").innerHTML=`<div class="hero">
+    <h1 class="condensed">Who do you need on site?</h1>
+    <p>Describe the build in your own words. We’ll turn it into the right trades, skills, place and start date.</p>
+    <form class="ask" id="askForm">
+      <label for="ask">Describe your build</label>
+      <div class="ask-row">
+        <textarea id="ask" rows="2" placeholder="I’m building in Phoenix, AZ and need a GPU install expert who has done it before, from next month">${esc(S.text)}</textarea>
+        <button class="btn" type="submit">Find my crew</button>
+      </div>
+      ${S.parsed?understoodHTML():`<div class="ask-try"><span>Try:</span>${EXAMPLES.map((e,i)=>`<button type="button" data-ex="${i}">${esc(e.length>48?e.slice(0,46)+"…":e)}</button>`).join("")}</div>`}
+    </form>
+  </div>`;
+  $("#askForm").addEventListener("submit",e=>{e.preventDefault(); const v=$("#ask").value.trim(); if(!v) return; S.text=v; applyParsed(parse(v)); render(); $("#results")?.scrollIntoView({behavior:"smooth",block:"start"});});
+  $("#ask").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); $("#askForm").requestSubmit(); }});
+  document.querySelectorAll("[data-ex]").forEach(b=>b.addEventListener("click",()=>{ $("#ask").value=EXAMPLES[+b.dataset.ex]; $("#askForm").requestSubmit(); }));
+  document.querySelectorAll("[data-drop]").forEach(b=>b.addEventListener("click",()=>{ const [k,v]=b.dataset.drop.split(":");
+    if(k==="trade") S.trades.delete(v); if(k==="spec") S.specs.delete(v); if(k==="loc") S.location=null; if(k==="start"){S.start=null;S.startLabel=null;} if(k==="vet") S.veteran=false; render(); }));
+}
+function understoodHTML(){
+  const chips=[];
+  if(S.location) chips.push(`<span class="chip"><span>Site</span><b>${esc(S.location)}</b><button type="button" data-drop="loc:" aria-label="Remove site">×</button></span>`);
+  [...S.specs].forEach(id=>{const sp=SPECIALTIES.find(s=>s.id===id); chips.push(`<span class="chip"><span>Skill</span><b>${esc(sp.label)}</b><button type="button" data-drop="spec:${id}" aria-label="Remove ${esc(sp.label)}">×</button></span>`);});
+  [...S.trades].forEach(t=>chips.push(`<span class="chip trade" style="background:${TRADES[t].color};color:${TRADES[t].ink}">${tradeIcon(t,14,TRADES[t].ink)}<b>${TRADES[t].name}</b><button type="button" data-drop="trade:${t}" aria-label="Remove ${TRADES[t].name}">×</button></span>`));
+  if(S.startLabel) chips.push(`<span class="chip"><span>Start</span><b>${esc(S.startLabel)}</b><button type="button" data-drop="start:" aria-label="Remove start date">×</button></span>`);
+  if(S.veteran) chips.push(`<span class="chip"><b>Has done this build before</b><button type="button" data-drop="vet:" aria-label="Remove">×</button></span>`);
+  return `<div class="understood"><div class="lead">${chips.length?"Here’s what we understood. Remove anything that’s off.":"We couldn’t pick out a trade, place or date. Try naming the work, the city and when you need people."}</div><div class="chips">${chips.join("")}</div></div>`;
+}
+
+function renderWho(){
+  renderHeroWho();
+  const modeBtns=`<div class="modes" role="group" aria-label="How do you want to hire">
+    <button class="mode" type="button" data-mode="browse" aria-pressed="${S.mode==="browse"}"><span class="ic">${iconCart()}</span><span><span class="t">Build your own crew</span><span class="d" style="display:block">Pick people one by one by specialty and add them to your crew.</span></span></button>
+    <button class="mode" type="button" data-mode="crews" aria-pressed="${S.mode==="crews"}"><span class="ic">${iconCrew()}</span><span><span class="t">Hire a ready crew</span><span class="d" style="display:block">A complete crew that has worked one phase of a build together before.</span></span></button>
+  </div>`;
+  $("#app").innerHTML=`<section id="results" style="scroll-margin-top:12px">${modeBtns}<div id="list"></div></section><p class="sample">Preview with sample profiles. Real crew members appear once they join.</p>`;
+  document.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",()=>{S.mode=b.dataset.mode; render();}));
+  S.mode==="browse"?renderBrowse():renderCrews();
+}
+
+function renderBrowse(){
+  const filt=`<div class="filters" role="group" aria-label="Filter by trade">
+    <button class="fbtn plain" type="button" data-t="all" aria-pressed="${S.trades.size===0}">Everyone</button>
+    ${Object.entries(TRADES).map(([k,T])=>{const on=S.trades.has(k); return `<button class="fbtn" type="button" data-t="${k}" aria-pressed="${on}" style="${on?`background:${T.color};color:${T.ink}`:""}"><span class="dot" style="background:${T.color}">${tradeIcon(k,15,T.ink)}</span>${T.name}</button>`;}).join("")}
+    <button class="fbtn plain" type="button" id="vetToggle" aria-pressed="${S.veteran}" style="${S.veteran?"background:var(--maroon);color:#FBEBDC":""}">Done it before</button>
+  </div>`;
+  const ranked=PEOPLE.map(p=>({p,r:score(p)})).filter(x=>x.r).sort((a,b)=>b.r.s-a.r.s);
+  $("#list").innerHTML=filt+`<p class="count">${ranked.length} ${ranked.length===1?"person matches":"people match"}${S.location?` near ${esc(S.location)} or willing to travel`:""}</p>`+
+    (ranked.length?`<div class="grid">${ranked.map(x=>personCard(x.p,x.r.hits)).join("")}</div>`:`<div class="empty">No one matches every filter. Remove a skill or trade above to see more people.</div>`);
+  document.querySelectorAll("[data-t]").forEach(b=>b.addEventListener("click",()=>{const t=b.dataset.t; if(t==="all") S.trades.clear(); else S.trades.has(t)?S.trades.delete(t):S.trades.add(t); render();}));
+  $("#vetToggle").addEventListener("click",()=>{S.veteran=!S.veteran; render();});
+  document.querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click",()=>{const id=b.dataset.add; S.crew=null; S.cart.includes(id)?S.cart.splice(S.cart.indexOf(id),1):S.cart.push(id); renderBar(); refreshCard(id);}));
+}
+function availHTML(p){
+  const d=availDate(p);
+  if(S.start){ const late=daysBetween(S.start,d); return late>0?`<span class="avail late">Free from ${fmt(d)}, ${late} days after your start</span>`:`<span class="avail ok">Free for your ${fmt(S.start)} start</span>`; }
+  return `<span class="avail ok">Free from ${fmt(d)}</span>`;
+}
+function personCard(p,hits=[]){
+  const T=TRADES[p.trade], picked=S.cart.includes(p.id);
+  const specTags=p.spec.map(id=>{const sp=SPECIALTIES.find(s=>s.id===id); return `<span class="tag ${hits.includes(id)?"hit":""}">${esc(sp.label)}</span>`;}).join("");
+  const local=S.location&&placeOf(p.base)===S.location;
+  return `<article class="card ${picked?"picked":""}" id="card-${p.id}">
+    <div class="who">${ava(p)}<div style="min-width:0"><h3>${esc(p.name)}</h3><div class="role">${esc(p.role)}</div><div class="meta">${esc(p.base)}${local?" (local)":""}, ${p.years} ${p.years===1?"year":"years"}${p.apprentice?", apprentice":""}</div></div></div>
+    <div class="facts">${specTags}<span class="tag">${p.builds} data center ${p.builds===1?"build":"builds"}</span></div>
+    <div><div class="sec">Past work</div><ul class="past">${p.past.slice(0,2).map(w=>`<li><span>${esc(w[0])}</span><span class="y">${w[1]}</span></li>`).join("")}</ul></div>
+    <div><div class="sec">Background</div><div class="facts" style="margin-top:6px">${p.pedigree.map(x=>`<span class="tag">${esc(x)}</span>`).join("")}</div></div>
+    <div class="card-foot"><div><div class="rate">${money(p.rate)}<small> /hr</small></div>${availHTML(p)}</div>
+    <button class="btn ${picked?"light":""}" type="button" data-add="${p.id}" aria-pressed="${picked}">${picked?"Added ✓":"Add to crew"}</button></div>
+  </article>`;
+}
+function refreshCard(id){ const el=$("#card-"+id); if(!el) return; const hits=score(byId[id])?.hits||[]; el.outerHTML=personCard(byId[id],hits);
+  const b=$(`#card-${id} [data-add]`); b.addEventListener("click",()=>{S.crew=null; S.cart.includes(id)?S.cart.splice(S.cart.indexOf(id),1):S.cart.push(id); renderBar(); refreshCard(id);}); b.focus(); }
+
+function renderCrews(){
+  const filt=`<div class="filters" role="group" aria-label="Filter by phase of the build">
+    <button class="fbtn plain" type="button" data-ph="all" aria-pressed="${!S.phase}" style="${!S.phase?"background:var(--maroon);color:#FBEBDC":""}">All phases</button>
+    ${PHASES.map(ph=>{const on=S.phase===ph.id; const c=ph.trade?TRADES[ph.trade]:{color:"#3A1418",ink:"#FBEBDC"}; return `<button class="fbtn plain" type="button" data-ph="${ph.id}" aria-pressed="${on}" style="${on?`background:${c.color};color:${c.ink}`:""}">${ph.name}</button>`;}).join("")}
+  </div>`;
+  let list=CREWS.filter(c=>!S.phase||c.phase===S.phase);
+  list.sort((a,b)=>((S.location&&b.base===S.location)-(S.location&&a.base===S.location))||a.availIn-b.availIn);
+  $("#list").innerHTML=filt+`<p class="count">${list.length} ready ${list.length===1?"crew":"crews"}</p>`+
+    (list.length?`<div class="grid">${list.map(crewCard).join("")}</div>`:`<div class="empty">No ready crew for this phase yet. Build your own crew instead.</div>`);
+  document.querySelectorAll("[data-ph]").forEach(b=>b.addEventListener("click",()=>{S.phase=b.dataset.ph==="all"?null:b.dataset.ph; render();}));
+  document.querySelectorAll("[data-crew]").forEach(b=>b.addEventListener("click",()=>{S.crew=b.dataset.crew; S.cart=[...CREWS.find(c=>c.id===S.crew).members]; S.step="when"; render(); window.scrollTo(0,0);}));
+}
+function crewRate(c){ const named=c.members.reduce((s,id)=>s+byId[id].rate,0); const extraN=c.size-c.members.length; const avg=c.phase==="grid"?84:c.phase==="fitout"?66:62; return named+extraN*avg; }
+function crewCard(c){
+  const ph=PHASES.find(p=>p.id===c.phase); const T=ph.trade?TRADES[ph.trade]:{color:"#3A1418",ink:"#FBEBDC"};
+  const trades=[...new Set(c.members.map(id=>byId[id].trade))];
+  const d=addDays(today,c.availIn); const late=S.start?daysBetween(S.start,d):0;
+  return `<article class="crew">
+    <div class="crew-top" style="background:${T.color};color:${T.ink}">
+      <div class="phase">${esc(ph.name)}, based in ${esc(c.base)}</div>
+      <h3 class="condensed">${esc(c.name)}</h3>
+      <div class="stack">${c.members.map(id=>ava(byId[id])).join("")}</div>
+    </div>
+    <div class="crew-body">
+      <p>${esc(c.blurb)}</p>
+      <div class="facts"><span class="tag">${c.size} people</span><span class="tag">${c.builds} builds together</span>${c.extra?`<span class="tag">${esc(c.extra)}</span>`:""}</div>
+      <div><div class="sec">Led by</div><div style="display:flex;align-items:center;gap:10px;margin-top:6px">${miniAva(byId[c.members[0]])}<span><b>${esc(byId[c.members[0]].name)}</b>, ${esc(byId[c.members[0]].role.toLowerCase())}</span></div></div>
+      <div class="mix">${trades.map(t=>`<span class="tag" style="display:inline-flex;gap:6px;align-items:center"><span style="width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:${TRADES[t].color}">${tradeIcon(t,11,TRADES[t].ink)}</span>${TRADES[t].short}</span>`).join("")}</div>
+      <div class="card-foot"><div><div class="rate">${money(crewRate(c)*HOURS)}<small> /week</small></div>${S.start&&late>0?`<span class="avail late">Free from ${fmt(d)}, ${late} days after your start</span>`:`<span class="avail ok">Free from ${fmt(d)}</span>`}</div>
+      <button class="btn" type="button" data-crew="${c.id}">Pick this crew</button></div>
+    </div>
+  </article>`;
+}
+function miniAva(p){return `<span class="ava" style="width:34px;height:34px">${face(p).replace('class="face"','class="face" style="width:34px;height:34px"')}</span>`;}
+
+function renderBar(){
+  const bar=$("#bar");
+  if(S.step!=="who"||!S.cart.length||S.crew){ bar.classList.remove("show"); bar.innerHTML=""; return; }
+  const ppl=S.cart.map(id=>byId[id]); const wk=ppl.reduce((s,p)=>s+p.rate,0)*HOURS;
+  bar.innerHTML=`<div class="in"><div class="stack">${ppl.slice(0,5).map(ava).join("")}</div>
+    <div class="sum"><b>${ppl.length} in your crew</b><br>${money(wk)} a week at ${HOURS} hrs</div>
+    <button class="btn" type="button" id="toWhen">Next: when and rate</button></div>`;
+  bar.classList.add("show");
+  $("#toWhen").addEventListener("click",()=>{S.step="when"; render(); window.scrollTo(0,0);});
+}
+
+/* step 2 */
+function members(){ return S.cart.map(id=>byId[id]); }
+function renderWhen(){
+  const crew=S.crew?CREWS.find(c=>c.id===S.crew):null;
+  if(!S.start) S.start=addDays(today,14);
+  $("#hero").innerHTML=`<div class="hero"><h1 class="condensed">When do you need them?</h1><p>${crew?`Crew ${esc(crew.name)}, ${crew.size} people.`:`${S.cart.length} ${S.cart.length===1?"person":"people"} in your crew.`} Check dates and rates before you send the request.</p></div>`;
+  const ppl=members();
+  const late=ppl.filter(p=>availDate(p)>S.start);
+  const rateSum=ppl.reduce((s,p)=>s+p.rate,0)+(crew?(crewRate(crew)-ppl.reduce((s,p)=>s+p.rate,0)):0);
+  const weekly=rateSum*HOURS, total=weekly*S.weeks;
+  const earliest=new Date(Math.max(...ppl.map(p=>+availDate(p)), crew?+addDays(today,crew.availIn):0));
+  $("#app").innerHTML=`<div class="two" style="margin-top:22px">
+    <div class="panel">
+      <div class="field"><label for="start">Start date on site</label><input id="start" type="date" value="${iso(S.start)}" min="${iso(today)}"></div>
+      <div class="field" style="margin-top:16px"><span style="font-weight:700;font-size:15px" id="lenL">How long</span>
+        <div class="seg" role="group" aria-labelledby="lenL">${[4,8,12,26].map(w=>`<button type="button" data-w="${w}" aria-pressed="${S.weeks===w}">${w===26?"6 months":w+" weeks"}</button>`).join("")}</div></div>
+      <div style="margin-top:18px">${late.length?`<div class="warnbox">${late.length===1?esc(late[0].name)+" is":late.length+" people are"} free a little after your start. <button type="button" class="rm" id="shift" style="color:#6E3D00">Start on ${fmt(earliest)} instead</button>${S.crew?"":" or swap them out."}</div>`:`<div class="okbox">Everyone is free for a ${fmtLong(S.start)} start.</div>`}</div>
+      <div style="margin-top:8px">${ppl.map(p=>`<div class="row">${ava(p)}<div class="nm"><b>${esc(p.name)}</b><span>${esc(p.role)}</span><br>${availHTML(p)}</div><div class="r"><b>${money(p.rate)}</b>/hr${S.crew?"":`<br><button type="button" class="rm" data-rm="${p.id}">Remove</button>`}</div></div>`).join("")}
+      ${crew&&crew.extra?`<div class="row"><span class="ava" style="width:46px;height:46px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-weight:800">+${crew.size-crew.members.length}</span><div class="nm"><b>${esc(crew.extra[0].toUpperCase()+crew.extra.slice(1))}</b><span>Regulars on this crew</span></div><div class="r"><b>${money((crewRate(crew)-ppl.reduce((s,p)=>s+p.rate,0)))}</b>/hr total</div></div>`:""}</div>
+    </div>
+    <div class="panel" style="position:sticky;top:12px">
+      <div class="total">
+        <div><span>Crew rate</span><b>${money(rateSum)}/hr</b></div>
+        <div><span>Per week, ${HOURS} hrs</span><b>${money(weekly)}</b></div>
+        <div><span>Length</span><b>${S.weeks===26?"6 months":S.weeks+" weeks"}</b></div>
+        <div class="big"><span>Estimate</span><span>${money(total)}</span></div>
+      </div>
+      <p class="note" style="margin-top:10px">Bill rates include payroll, insurance and Rackcrew’s fee. Overtime, per diem and travel are quoted once the crew confirms.</p>
+      <div style="display:grid;gap:10px;margin-top:16px">
+        <button class="btn" type="button" id="toConfirm" ${ppl.length?"":"disabled"}>Next: confirm</button>
+        <button class="btn light" type="button" id="back">Back to ${S.crew?"crews":"people"}</button>
+      </div>
+    </div>
+  </div>`;
+  $("#start").addEventListener("change",e=>{ if(e.target.value){S.start=new Date(e.target.value+"T00:00"); S.startLabel=null;} render(); });
+  document.querySelectorAll("[data-w]").forEach(b=>b.addEventListener("click",()=>{S.weeks=+b.dataset.w; render();}));
+  document.querySelectorAll("[data-rm]").forEach(b=>b.addEventListener("click",()=>{S.cart=S.cart.filter(x=>x!==b.dataset.rm); if(!S.cart.length){S.step="who";} render();}));
+  $("#shift")?.addEventListener("click",()=>{S.start=earliest; render();});
+  $("#toConfirm").addEventListener("click",()=>{S.step="confirm"; render(); window.scrollTo(0,0);});
+  $("#back").addEventListener("click",()=>{ if(S.crew){S.cart=[];S.crew=null;S.mode="crews";} S.step="who"; render(); window.scrollTo(0,0);});
+}
+
+/* step 3 */
+function renderConfirm(){
+  const crew=S.crew?CREWS.find(c=>c.id===S.crew):null; const ppl=members();
+  const rateSum=crew?crewRate(crew):ppl.reduce((s,p)=>s+p.rate,0); const total=rateSum*HOURS*S.weeks;
+  $("#hero").innerHTML=`<div class="hero"><h1 class="condensed">Send the request.</h1><p>Each person confirms the dates and rate. Nothing is booked or charged until they do.</p></div>`;
+  const f=S.form;
+  $("#app").innerHTML=`<div class="two" style="margin-top:22px">
+    <form class="panel" id="cform" novalidate>
+      <div style="display:grid;gap:14px">
+        <div class="field"><label for="fn">Your name</label><input id="fn" name="name" autocomplete="name" required value="${esc(f.name||"")}"></div>
+        <div class="field"><label for="fc">Company</label><input id="fc" name="company" autocomplete="organization" required value="${esc(f.company||"")}"></div>
+        <div class="field"><label for="fe">Work email</label><input id="fe" name="email" type="email" autocomplete="email" required value="${esc(f.email||"")}"></div>
+        <div class="field"><label for="fs">Site location</label><input id="fs" name="site" required value="${esc(f.site||S.location||"")}" placeholder="City, state"></div>
+        <div class="field"><label for="fx">Anything the crew should know</label><textarea id="fx" name="notes" placeholder="Badging, site hours, union or open shop, per diem">${esc(f.notes||S.text||"")}</textarea></div>
+        <p id="ferr" class="warnbox" hidden></p>
+        <button class="btn gold" type="submit" style="min-height:56px;font-size:18px">Send crew request</button>
+        <button class="btn light" type="button" id="back2">Back</button>
+      </div>
+    </form>
+    <div class="panel">
+      <div class="sec">Your crew</div>
+      <div style="margin-top:6px">${crew?`<p style="font-weight:800;font-stretch:85%;font-size:24px">${esc(crew.name)}</p>`:""}${ppl.map(p=>`<div class="row">${ava(p)}<div class="nm"><b>${esc(p.name)}</b><span>${esc(p.role)}</span></div><div class="r">${money(p.rate)}/hr</div></div>`).join("")}${crew&&crew.extra?`<div class="row"><div class="nm"><b>${esc(crew.extra[0].toUpperCase()+crew.extra.slice(1))}</b></div></div>`:""}</div>
+      <div class="total" style="margin-top:10px">
+        <div><span>Starts</span><b>${fmtLong(S.start)}</b></div>
+        <div><span>Length</span><b>${S.weeks===26?"6 months":S.weeks+" weeks"}</b></div>
+        <div class="big"><span>Estimate</span><span>${money(total)}</span></div>
+      </div>
+    </div>
+  </div>`;
+  const form=$("#cform");
+  form.addEventListener("input",e=>{ if(e.target.name) S.form[e.target.name]=e.target.value; });
+  form.addEventListener("submit",e=>{ e.preventDefault(); const bad=[...form.querySelectorAll("[required]")].filter(i=>!i.value.trim()||(i.type==="email"&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(i.value)));
+    const err=$("#ferr"); if(bad.length){ err.hidden=false; err.textContent="Add your "+bad.map(i=>form.querySelector(`label[for=${i.id}]`).textContent.toLowerCase().replace(/^your /,"")).join(", ")+" so we can send this."; bad[0].focus(); return; }
+    S.step="sent"; render(); window.scrollTo(0,0); });
+  $("#back2").addEventListener("click",()=>{S.step="when"; render(); window.scrollTo(0,0);});
+}
+function renderSent(){
+  const crew=S.crew?CREWS.find(c=>c.id===S.crew):null; const ppl=members();
+  $("#hero").innerHTML="";
+  $("#app").innerHTML=`<div style="max-width:640px;margin:28px auto 0">
+    <div class="done-hero">
+      <div class="stack" style="margin:0 0 18px">${ppl.slice(0,6).map(ava).join("")}</div>
+      <h1 class="condensed" style="font-size:clamp(44px,8vw,72px)">Request sent.</h1>
+      <p style="margin-top:12px;color:#E8CDBF">${crew?`Crew ${esc(crew.name)} has`:`${ppl.length} ${ppl.length===1?"person has":"people have"}`} your dates. We’ll email ${esc(S.form.email||"you")} as each one confirms.</p>
+      <ol class="next">
+        <li><span class="n">1</span><span>Each crew member confirms dates and rate, usually within 48 hours.</span></li>
+        <li><span class="n">2</span><span>You get one contract for the whole crew. We carry payroll and insurance.</span></li>
+        <li><span class="n">3</span><span>The crew shows up on ${fmtLong(S.start)}, badged and ready.</span></li>
+      </ol>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px"><a class="btn" href="/">Back to Rackcrew</a><button class="btn light" type="button" id="again">Request another crew</button></div>
+    <p class="sample">This preview doesn’t send anything yet.</p>
+  </div>`;
+  $("#again").addEventListener("click",()=>{ Object.assign(S,{step:"who",cart:[],crew:null,parsed:null,text:"",form:{}}); S.trades.clear(); S.specs.clear(); S.location=null; S.start=null; S.startLabel=null; S.veteran=false; S.phase=null; render(); window.scrollTo(0,0);});
+}
+
+function iconCart(){return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3A1418" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.6 3-5.6 6-5.6s5.4 2 6 5.6"/><path d="M18 7v6M15 10h6"/></svg>`;}
+function iconCrew(){return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3A1418" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="8" r="2.6"/><circle cx="17" cy="8" r="2.6"/><circle cx="12" cy="6" r="2.8"/><path d="M2.5 19c.4-3 2.2-4.6 4.5-4.6M21.5 19c-.4-3-2.2-4.6-4.5-4.6M7 20c.5-3.4 2.5-5.4 5-5.4s4.5 2 5 5.4"/></svg>`;}
+
+render();
+})();
+</script>
+</body>
+</html>
