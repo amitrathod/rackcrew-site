@@ -16,12 +16,26 @@ a{color:inherit}a:hover{opacity:.88}
 h1,h2,p{margin:0}
 a:focus-visible{outline:3px solid #FFB347;outline-offset:3px}
 @media (max-width:860px){.rc-sec{flex-direction:column!important}}
+.hero{position:relative;overflow:hidden;background:#3A1418}
+.hero-px{position:absolute;inset:0;z-index:0;display:block}
+.hero-copy h1,.hero-copy p{transition:opacity .32s ease,transform .32s ease}
+.hero-copy .swap{opacity:0;transform:translateY(8px)}
+.hero-tabs{margin-top:56px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.hero-tabs [data-scene]{--fill:0;position:relative;overflow:hidden;min-height:44px;padding:10px 18px;border-radius:999px;border:1.5px solid rgba(251,235,220,.35);background:rgba(58,20,24,.55);color:#FBEBDC;font:600 15px 'Geist',system-ui,sans-serif;cursor:pointer;backdrop-filter:blur(4px)}
+.hero-tabs [data-scene]::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:calc(var(--fill)*100%);background:#E2A13A}
+.hero-tabs [data-scene][aria-pressed="true"]{border-color:#FBEBDC;background:rgba(251,235,220,.12)}
+.hero-pause{width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(251,235,220,.35);background:rgba(58,20,24,.55);color:#FBEBDC;display:grid;place-items:center;cursor:pointer}
+.hero-pause svg{fill:currentColor}.hero-pause .pl{display:none}.hero-pause[aria-pressed="true"] .pa{display:none}.hero-pause[aria-pressed="true"] .pl{display:block}
+@media (max-width:860px){.hero header{padding:24px 20px 40px!important}.hero-copy h1{margin-top:72px!important}}
+@media (prefers-reduced-motion:reduce){.hero-copy h1,.hero-copy p{transition:none}}
 </style>
 </head>
 <body>
 <div style="font-family: 'Geist', system-ui, sans-serif; background: #3A1418; color: #FBEBDC">
 
-<header style="max-width: 1360px; margin: 0 auto; padding: 28px 48px 104px">
+<section id="hero" class="hero" aria-roledescription="carousel" aria-label="Who builds data centers">
+<canvas class="hero-px" aria-hidden="true"></canvas>
+<header style="position: relative; z-index: 1; max-width: 1360px; margin: 0 auto; padding: 28px 48px 56px">
   <nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px">
     <a href="#top" style="font-family: 'Kotta One', Georgia, serif; font-weight: 400; font-size: 34px; letter-spacing: -0.01em; text-decoration: none">Rackcrew</a>
     <div style="display: flex; flex-wrap: wrap; gap: 10px">
@@ -29,10 +43,19 @@ a:focus-visible{outline:3px solid #FFB347;outline-offset:3px}
       <a href="/request" style="text-decoration: none; font-weight: 700; padding: 12px 22px; border-radius: 999px; background: #FBEBDC; color: #3A1418">Request a crew</a>
     </div>
   </nav>
-  <h1 id="top" style="margin-top: 112px; font-family: 'Kotta One', Georgia, serif; font-weight: 400; font-size: clamp(72px, 11vw, 184px); line-height: 0.98; letter-spacing: -0.01em; max-width: 9ch">Who’s building the AI boom?</h1>
-  <p style="margin-top: 36px; font-size: 22px; line-height: 1.45; max-width: 30em; color: #E8CDBF">Not the chips. The people. Rackcrew puts turbine, electrical, HVAC and network crews on data center sites.</p>
+  <div class="hero-copy" aria-live="polite">
+  <h1 id="top" style="margin-top: 104px; font-family: 'Kotta One', Georgia, serif; font-weight: 400; font-size: clamp(64px, 9.5vw, 160px); line-height: 0.98; letter-spacing: -0.01em; max-width: 9ch; text-wrap: balance">Who’s building the AI boom?</h1>
+  <p id="hero-sub" style="margin-top: 32px; font-size: 22px; line-height: 1.45; max-width: 30em; color: #E8CDBF">Not the chips. The people. Rackcrew puts turbine, electrical, HVAC and network crews on data center sites.</p>
+  </div>
   <div style="margin-top: 40px; display: flex; flex-wrap: wrap; gap: 10px"><a href="#turbines" style="background: #E2A13A; color: #3A1A0C; text-decoration: none; font-weight: 700; font-size: 18px; padding: 14px 24px; border-radius: 999px">Turbine</a><a href="#electrical" style="background: #B3141C; color: #FFF1E8; text-decoration: none; font-weight: 700; font-size: 18px; padding: 14px 24px; border-radius: 999px">Electrical</a><a href="#cooling" style="background: #E5793D; color: #2E1005; text-decoration: none; font-weight: 700; font-size: 18px; padding: 14px 24px; border-radius: 999px">HVAC</a><a href="#networks" style="background: #2E3A6E; color: #F6F1E7; text-decoration: none; font-weight: 700; font-size: 18px; padding: 14px 24px; border-radius: 999px">Networks</a></div>
+  <div class="hero-tabs" role="group" aria-label="Background scenes">
+    <button type="button" data-scene="0" aria-pressed="true">Racking</button>
+    <button type="button" data-scene="1" aria-pressed="false">Cooling</button>
+    <button type="button" data-scene="2" aria-pressed="false">Cabling</button>
+    <button type="button" id="hero-pause" class="hero-pause" aria-pressed="false" aria-label="Pause background"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect class="pa" x="2" y="1" width="3.5" height="12"/><rect class="pa" x="8.5" y="1" width="3.5" height="12"/><path class="pl" d="M3 1.5v11l9-5.5z"/></svg></button>
+  </div>
 </header>
+</section>
 
 <section id="turbines" aria-labelledby="turbines-q" style="background: #E2A13A; color: #3A1A0C">
   <div class="rc-sec" style="max-width: 1360px; margin: 0 auto; display: flex; flex-direction: row; align-items: center; gap: 0 56px">
@@ -99,5 +122,6 @@ a:focus-visible{outline:3px solid #FFB347;outline-offset:3px}
 </section>
 
 </div>
+<script src="/assets/hero.js" defer></script>
 </body>
 </html>
